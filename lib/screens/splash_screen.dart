@@ -38,12 +38,9 @@ class SplashScreen extends StatelessWidget {
         children: [
           Container(
             padding: EdgeInsets.all(20.0), // Add padding for better spacing
-            child: Hero(
-              tag: 'cmp_name',
-              child: Text(
-                "RK DISTRIBUTOR",
-                style: textStyleController.loginTextStyle.value,
-              ),
+            child: Text(
+              "RK DISTRIBUTOR",
+              style: textStyleController.loginTextStyle.value,
             ),
           ),
           SizedBox(height: 20),

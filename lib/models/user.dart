@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  final bool superSu;
-  final bool updateAccess;
-  final bool writeAccess;
-  final bool appAccess;
+  bool superSu;
+  bool updateAccess;
+  bool writeAccess;
+  bool appAccess;
   final String createdAt;
-  final String email;
+  String email;
   final String lastLoginAt;
   final bool loggedIn;
   final String photoUrl;
   final String uid;
-  final String name;
+  String name;
 
   User(
       {required this.superSu,

@@ -70,16 +70,19 @@ class AuthService extends GetxService {
           if (docSnapshot.exists) {
             bool isSuperSu = docSnapshot['access']['superSu'] ?? false;
             superSu.value = isSuperSu;
-            if(isSuperSu){
+            if (isSuperSu) {
               appAccess.value = true;
               writeAccess.value = true;
               updateAccess.value = true;
-              await _firestore.collection('users').doc(firebaseUser.uid).update({
+              await _firestore
+                  .collection('users')
+                  .doc(firebaseUser.uid)
+                  .update({
                 'access.writeAccess': true,
                 'access.updateAccess': true,
-                'appAccess':true,
+                'appAccess': true,
               });
-            }else {
+            } else {
               appAccess.value = docSnapshot['appAccess'] ?? false;
               updateAccess.value =
                   docSnapshot['access']['updateAccess'] ?? false;
@@ -98,6 +101,11 @@ class AuthService extends GetxService {
                 'updateAccess': docSnapshot['access']['updateAccess']
               }
             });
+            bool loggedIn = docSnapshot['loggedIn'] ?? false;
+            if (!loggedIn) {
+              // If loggedIn is set to false, sign out the user
+              signOut();
+            }
           }
         });
       } else {
@@ -199,19 +207,18 @@ class AuthService extends GetxService {
           });
           bool isSuperSu = docSnapshot['access']['superSu'] ?? false;
           superSu.value = isSuperSu;
-          if(isSuperSu){
+          if (isSuperSu) {
             appAccess.value = true;
             writeAccess.value = true;
             updateAccess.value = true;
             await _firestore.collection('users').doc(tempUser.uid).update({
               'access.writeAccess': true,
               'access.updateAccess': true,
-              'appAccess':true,
+              'appAccess': true,
             });
-          }else {
+          } else {
             appAccess.value = docSnapshot['appAccess'] ?? false;
-            updateAccess.value =
-                docSnapshot['access']['updateAccess'] ?? false;
+            updateAccess.value = docSnapshot['access']['updateAccess'] ?? false;
             writeAccess.value = docSnapshot['access']['writeAccess'] ?? false;
           }
           _localStorage.write('user', {

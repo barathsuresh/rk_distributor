@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:rk_distributor/constants/themes.dart';
+import 'package:rk_distributor/controllers/user_controller.dart';
 import 'package:rk_distributor/controllers/user_management_controller.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_norm.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_super_su.dart';
@@ -36,6 +37,7 @@ void _startAppServices() {
   Get.lazyPut(() => ThemeService(), fenix: true);
   Get.lazyPut(() => TextStyleController(), fenix: true);
   Get.lazyPut(() => UserManagementController(), fenix: true);
+  Get.lazyPut(() => UserController(), fenix: true);
 }
 
 class MyApp extends StatelessWidget {

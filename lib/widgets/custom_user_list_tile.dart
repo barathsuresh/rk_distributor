@@ -3,42 +3,19 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
+import 'package:rk_distributor/services/theme_service.dart';
 
 import '../models/user.dart';
 
 class CustomUserListTile extends StatelessWidget {
   final User user;
   final Function onTap;
+  final Widget? trailing;
 
-  CustomUserListTile({required this.user, required this.onTap});
+  CustomUserListTile({required this.user, required this.onTap, this.trailing});
 
   final TextStyleController textStyleController = Get.find();
-
-  Widget _buildAccessIcons() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (user.writeAccess)
-          Icon(
-            CommunityMaterialIcons.pencil,
-            color: Colors.green,
-            size: 20,
-          ),
-        if (user.updateAccess)
-          Icon(
-            CommunityMaterialIcons.update,
-            color: Colors.orange,
-            size: 20,
-          ),
-        if (user.appAccess)
-          Icon(
-            CommunityMaterialIcons.check,
-            color: Colors.blue,
-            size: 20,
-          ),
-      ],
-    );
-  }
+  final ThemeService themeService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +37,32 @@ class CustomUserListTile extends StatelessWidget {
               user.name,
               style: textStyleController.userListTileTitleStyle.value,
             ),
-            SizedBox(width: 5,),
+            SizedBox(
+              width: 5,
+            ),
             if (user.superSu)
               Icon(
                 CommunityMaterialIcons.shield_account,
                 color: Colors.red,
-                size: 20,
+                size: 16,
+              ),
+            if (user.writeAccess)
+              Icon(
+                CommunityMaterialIcons.pencil,
+                color: Colors.green,
+                size: 16,
+              ),
+            if (user.updateAccess)
+              Icon(
+                CommunityMaterialIcons.update,
+                color: Colors.orange,
+                size: 16,
+              ),
+            if (user.appAccess)
+              Icon(
+                CommunityMaterialIcons.check,
+                color: Colors.blue,
+                size: 16,
               )
           ],
         ),
@@ -73,7 +70,7 @@ class CustomUserListTile extends StatelessWidget {
           user.email,
           style: textStyleController.userListTileSubtitleStyle.value,
         ),
-        trailing: _buildAccessIcons(),
+        trailing: trailing,
         // Use the provided trailing widget
         onTap: () {
           // Handle tap action here

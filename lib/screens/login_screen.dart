@@ -38,14 +38,11 @@ class LoginScreen extends StatelessWidget {
             Container(
               height: MediaQuery.of(context).size.height * 0.05,
               child: Center(
-                child: Hero(
-                  tag: 'cmp_name',
-                  child: AnimatedTextKit(totalRepeatCount: 1, animatedTexts: [
-                    TypewriterAnimatedText("RK DISTRIBUTOR",
-                        speed: Duration(milliseconds: 95),
-                        textStyle: textStyleController.loginTextStyle.value)
-                  ]),
-                ),
+                child: AnimatedTextKit(totalRepeatCount: 1, animatedTexts: [
+                  TypewriterAnimatedText("RK DISTRIBUTOR",
+                      speed: Duration(milliseconds: 95),
+                      textStyle: textStyleController.loginTextStyle.value)
+                ]),
               ),
             ),
             SizedBox(

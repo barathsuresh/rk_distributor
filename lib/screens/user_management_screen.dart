@@ -1,12 +1,12 @@
 import 'package:community_material_icon/community_material_icon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:iconsax/iconsax.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:rk_distributor/controllers/user_management_controller.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/models/user.dart';
+import 'package:rk_distributor/screens/about_user_screen.dart';
 import 'package:rk_distributor/widgets/custom_user_list_tile.dart';
 
 class UserManagementScreen extends StatelessWidget {
@@ -30,9 +30,10 @@ class UserManagementScreen extends StatelessWidget {
                 // TODO: Implement Requests function
               },
               icon: badges.Badge(
+                badgeStyle: badges.BadgeStyle(padding: EdgeInsets.all(4)),
                 badgeContent: Text(
                   '$pendingRequests',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontSize: 12),
                 ),
                 child: Icon(Icons.person_add),
               ),
@@ -58,7 +59,7 @@ class UserManagementScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _buildFilterChips(),
+          _buildFilterDropdownMenu(),
           Expanded(
             child: Obx(
               () {
@@ -101,7 +102,9 @@ class UserManagementScreen extends StatelessWidget {
                               User user =
                                   userManagementController.filteredUsers[index];
                               return CustomUserListTile(
-                                  user: user, onTap: () {});
+                                  user: user, onTap: () {
+                                  Get.to(AboutUserScreen(user: user,));
+                              });
                             },
                           );
               },
@@ -112,58 +115,77 @@ class UserManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChips() {
+  Widget _buildFilterDropdownMenu() {
     return Obx(
-      () => Align(
-        alignment: Alignment.topLeft,
-        child: Container(
-          padding: EdgeInsets.all(8),
-          child: Wrap(
-            spacing: 8,
-            children: [
-              FilterChip(
-                label: Text('All'),
-                selected: userManagementController.selectedFilter.value ==
-                    UserFilter.all,
-                onSelected: (selected) {
-                  userManagementController.applyFilter(UserFilter.all);
-                },
+      () => Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              // Implement filter action here
+            },
+            icon: Icon(Icons.filter_list),
+          ),
+          DropdownButton(
+            value: userManagementController.selectedFilter.value,
+            onChanged: (value) {
+              userManagementController.applyFilter(value!);
+            },
+            items: [
+              DropdownMenuItem(
+                value: UserFilter.all,
+                child: Text('All'),
               ),
-              FilterChip(
-                label: Text('Super User'),
-                selected: userManagementController.selectedFilter.value ==
-                    UserFilter.superSu,
-                onSelected: (selected) {
-                  userManagementController.applyFilter(UserFilter.superSu);
-                },
+              DropdownMenuItem(
+                value: UserFilter.superSu,
+                child: Wrap(
+                  children: [
+                    Icon(
+                      CommunityMaterialIcons.shield_account,
+                      color: Colors.red,
+                    ),
+                    Text(' Super User'),
+                  ],
+                ),
               ),
-              FilterChip(
-                label: Text('App Access'),
-                selected: userManagementController.selectedFilter.value ==
-                    UserFilter.appAccess,
-                onSelected: (selected) {
-                  userManagementController.applyFilter(UserFilter.appAccess);
-                },
+              DropdownMenuItem(
+                value: UserFilter.appAccess,
+                child: Wrap(
+                  children: [
+                    Icon(
+                      CommunityMaterialIcons.check,
+                      color: Colors.blue,
+                    ),
+                    Text(' App Access'),
+                  ],
+                ),
               ),
-              FilterChip(
-                label: Text('Write Access'),
-                selected: userManagementController.selectedFilter.value ==
-                    UserFilter.writeAccess,
-                onSelected: (selected) {
-                  userManagementController.applyFilter(UserFilter.writeAccess);
-                },
+              DropdownMenuItem(
+                value: UserFilter.writeAccess,
+                child: Wrap(
+                  children: [
+                    Icon(
+                      CommunityMaterialIcons.pencil,
+                      color: Colors.green,
+                    ),
+                    Text(' Write Access'),
+                  ],
+                ),
               ),
-              FilterChip(
-                label: Text('Update Access'),
-                selected: userManagementController.selectedFilter.value ==
-                    UserFilter.updateAccess,
-                onSelected: (selected) {
-                  userManagementController.applyFilter(UserFilter.updateAccess);
-                },
+              DropdownMenuItem(
+                value: UserFilter.updateAccess,
+                child: Wrap(
+                  children: [
+                    Icon(
+                      CommunityMaterialIcons.update,
+                      color: Colors.orange,
+                    ),
+                    Text(' Update Access'),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
