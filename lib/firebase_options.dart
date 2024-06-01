@@ -3,7 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
-
+import 'package:rk_distributor/app_config.dart';
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCuqxZS8pyKV_HO-qz6_CkjeYn5dAYmQGo',
+    apiKey: AppConfig.FIREBASEOPTIONS_API_KEY,
     appId: '1:479604990937:android:2f0c3306fd9f830fc16fc8',
     messagingSenderId: '479604990937',
     projectId: 'rk-distributor',

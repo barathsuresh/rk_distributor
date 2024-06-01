@@ -51,6 +51,7 @@ dependencies:
   iconsax: ^0.0.8
   ionicons: ^0.2.2
   badges: ^3.1.2
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
