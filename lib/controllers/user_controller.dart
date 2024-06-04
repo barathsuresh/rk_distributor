@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rk_distributor/models/user.dart';
+import 'package:rk_distributor/models/user_model.dart';
 
 class UserController extends GetxController {
-  var user = Rxn<User>(); // User object to store user data
-  User? userBackup; // Backup of the original user data
+  var user = Rxn<UserModel>(); // User object to store user data
+  UserModel? userBackup; // Backup of the original user data
   var isEditing = false.obs;
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
@@ -18,7 +18,7 @@ class UserController extends GetxController {
   }
 
   // Method to initialize the user data
-  void setUser(User newUser) {
+  void setUser(UserModel newUser) {
     user.value = newUser;
     _startUserListener(newUser.uid);
   }
@@ -39,7 +39,7 @@ class UserController extends GetxController {
     userSubscription =
         usersCollection.doc(userId).snapshots().listen((snapshot) {
       if (snapshot.exists) {
-        user.value = User.fromFirestore(snapshot);
+        user.value = UserModel.fromFirestore(snapshot);
       }
     });
   }
@@ -241,7 +241,7 @@ class UserController extends GetxController {
       }
     } else {
       // Create a backup when starting to edit
-      userBackup = User(
+      userBackup = UserModel(
         uid: user.value!.uid,
         name: user.value!.name,
         email: user.value!.email,

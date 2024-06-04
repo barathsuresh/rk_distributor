@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,14 +11,15 @@ import 'package:rk_distributor/constants/util_functions.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/controllers/user_controller.dart';
 import 'package:rk_distributor/services/theme_service.dart';
+import 'package:rk_distributor/widgets/custom_dialog_box.dart';
 import 'package:rk_distributor/widgets/custom_list_tile.dart';
 
-import '../models/user.dart';
+import '../models/user_model.dart';
 
 class AboutUserScreen extends StatelessWidget {
   AboutUserScreen({required this.user});
 
-  User user;
+  UserModel user;
 
   final TextStyleController textStyleController = Get.find();
   final UserController userController = Get.put(UserController());
@@ -234,7 +233,6 @@ class AboutUserScreen extends StatelessWidget {
           title: 'Logout This User',
           trailing: Icon(
             CommunityMaterialIcons.logout,
-            color: Colors.black,
           ),
           onTap: () {
             // Implement logout functionality here
@@ -277,19 +275,24 @@ class AboutUserScreen extends StatelessWidget {
             trailing: Switch(
               value: userController.user.value!.superSu,
               onChanged: (value) async {
-                if (await LocalAuthApi.authenticate()) {
+                bool auth = await LocalAuthApi.authenticate();
+                if (auth) {
                   userController.toggleSuperSuAccess();
                 } else {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Authentication Required'),
-                      content: Text(
-                          'Device must have biometrics or password enabled to grant SuperSu access.'),
+                    builder: (context) => CustomDialogBox(
+                      title: 'Authentication Required',
+                      content: 'Biometric is required to perform this action',
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('OK'),
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: Text(
+                            'OK',
+                            style: GoogleFonts.roboto(),
+                          ),
                         ),
                       ],
                     ),
@@ -360,14 +363,18 @@ class AboutUserScreen extends StatelessWidget {
                 } else {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Authentication Required'),
-                      content: Text(
-                          'Device must have biometrics or password enabled to grant App access.'),
+                    builder: (context) => CustomDialogBox(
+                      title: 'Authentication Required',
+                      content: 'Biometric is required to perform this action',
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('OK'),
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: Text(
+                            'OK',
+                            style: GoogleFonts.roboto(),
+                          ),
                         ),
                       ],
                     ),

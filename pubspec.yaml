@@ -54,6 +54,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   local_auth: ^2.2.0
   intl: ^0.19.0
+  standard_searchbar: ^2.1.1
+  flutter_material_search_bar: ^1.0.1
 
 dev_dependencies:
   flutter_test:

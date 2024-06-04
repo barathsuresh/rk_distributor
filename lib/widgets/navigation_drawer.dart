@@ -45,6 +45,15 @@ class CustomNavigationDrawer extends StatelessWidget {
             subtitle: 'Manage Users',
           ),
           CustomListTile(
+            leadingIcon: Icons.person,
+            title: 'Product',
+            onTap: () {
+              Navigator.of(context).pop();
+              Get.to(UserManagementScreen());
+            },
+            subtitle: 'Manage Users',
+          ),
+          CustomListTile(
             leadingIcon: Icons.settings,
             title: 'Settings',
             onTap: () {

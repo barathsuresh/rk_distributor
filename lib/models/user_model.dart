@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class User {
+class UserModel {
   bool superSu;
   bool updateAccess;
   bool writeAccess;
@@ -13,7 +13,7 @@ class User {
   final String uid;
   String name;
 
-  User(
+  UserModel(
       {required this.superSu,
       required this.updateAccess,
       required this.writeAccess,
@@ -27,9 +27,9 @@ class User {
       required this.name});
 
   // Factory method to create a UserModel from a Firestore document
-  factory User.fromFirestore(DocumentSnapshot doc) {
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    return User(
+    return UserModel(
         superSu: data['access']['superSu'] ?? false,
         updateAccess: data['access']['updateAccess'] ?? false,
         writeAccess: data['access']['writeAccess'] ?? false,

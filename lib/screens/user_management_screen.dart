@@ -5,16 +5,20 @@ import 'package:get/get.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:rk_distributor/controllers/user_management_controller.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
-import 'package:rk_distributor/models/user.dart';
+import 'package:rk_distributor/models/user_model.dart';
 import 'package:rk_distributor/screens/about_user_screen.dart';
-import 'package:rk_distributor/widgets/custom_user_list_tile.dart';
+import 'package:rk_distributor/screens/app_access_request_screen.dart';
+import 'package:rk_distributor/widgets/custom_search_bar.dart';
+import 'package:rk_distributor/widgets/custom_user_list_tile_mgmnt.dart';
 
 class UserManagementScreen extends StatelessWidget {
   UserManagementScreen({Key? key});
 
+  final TextEditingController _searchController = TextEditingController();
   final TextStyleController textStyleController = Get.find();
+  final FocusNode _searchFocusNode = FocusNode();
   final UserManagementController userManagementController =
-      Get.find<UserManagementController>();
+  Get.find<UserManagementController>();
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +31,10 @@ class UserManagementScreen extends StatelessWidget {
                 .length;
             return IconButton(
               onPressed: () {
-                // TODO: Implement Requests function
+                Get.to(AppAccessRequestScreen());
               },
               icon: badges.Badge(
+                showBadge: pendingRequests == 0 ? false : true,
                 badgeStyle: badges.BadgeStyle(padding: EdgeInsets.all(4)),
                 badgeContent: Text(
                   '$pendingRequests',
@@ -39,12 +44,6 @@ class UserManagementScreen extends StatelessWidget {
               ),
             );
           }),
-          IconButton(
-            onPressed: () {
-              // TODO: Implement Search function
-            },
-            icon: Icon(Icons.search),
-          )
         ],
         title: Row(
           children: [
@@ -59,54 +58,60 @@ class UserManagementScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _buildFilterDropdownMenu(),
+          _buildSearchAndFilterBar(),
           Expanded(
             child: Obx(
-              () {
+                  () {
                 return userManagementController.users.isEmpty
                     ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 40,
-                            ),
-                            SizedBox(
-                              height: 9,
-                            ),
-                            Text("Nothing To Be Displayed")
-                          ],
-                        ),
-                      )
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 40,
+                      ),
+                      SizedBox(
+                        height: 9,
+                      ),
+                      Text("Nothing To Be Displayed")
+                    ],
+                  ),
+                )
                     : userManagementController.filteredUsers.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 40,
-                                ),
-                                SizedBox(
-                                  height: 9,
-                                ),
-                                Text("No results")
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount:
-                                userManagementController.filteredUsers.length,
-                            itemBuilder: (context, index) {
-                              User user =
-                                  userManagementController.filteredUsers[index];
-                              return CustomUserListTile(
-                                  user: user, onTap: () {
-                                  Get.to(AboutUserScreen(user: user,));
-                              });
-                            },
-                          );
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 40,
+                      ),
+                      SizedBox(
+                        height: 9,
+                      ),
+                      Text("No results")
+                    ],
+                  ),
+                )
+                    : ListView.separated(
+                  separatorBuilder: (context, index) =>
+                  const Divider(),
+                  itemCount:
+                  userManagementController.filteredUsers.length,
+                  itemBuilder: (context, index) {
+                    UserModel user =
+                    userManagementController.filteredUsers[index];
+                    return CustomUserListTileMgmnt(
+                        user: user,
+                        onTap: () {
+                          _searchFocusNode.unfocus();
+                          Get.to(AboutUserScreen(
+                            user: user,
+                          ));
+                        });
+                  },
+                );
               },
             ),
           ),
@@ -115,78 +120,125 @@ class UserManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterDropdownMenu() {
-    return Obx(
-      () => Row(
+  Widget _buildSearchAndFilterBar() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
         children: [
-          IconButton(
-            onPressed: () {
-              // Implement filter action here
-            },
-            icon: Icon(Icons.filter_list),
+          Expanded(
+            child: CustomSearchBar(
+              searchController: _searchController,
+              searchFocusNode: _searchFocusNode,
+              onChanged: (value) {
+                String query = value.toLowerCase();
+                userManagementController.filteredUsers.assignAll(
+                  userManagementController.users.where((user) {
+                    return user.name.toLowerCase().contains(query) ||
+                        user.email.toLowerCase().contains(query);
+                  }).toList(),
+                );
+              },
+              onClear: () {
+                _searchController.clear();
+                userManagementController.filteredUsers.assignAll(
+                  userManagementController.users,
+                );
+              },
+            ),
           ),
-          DropdownButton(
-            value: userManagementController.selectedFilter.value,
-            onChanged: (value) {
-              userManagementController.applyFilter(value!);
-            },
-            items: [
-              DropdownMenuItem(
-                value: UserFilter.all,
-                child: Text('All'),
-              ),
-              DropdownMenuItem(
-                value: UserFilter.superSu,
-                child: Wrap(
-                  children: [
-                    Icon(
-                      CommunityMaterialIcons.shield_account,
-                      color: Colors.red,
-                    ),
-                    Text(' Super User'),
-                  ],
-                ),
-              ),
-              DropdownMenuItem(
-                value: UserFilter.appAccess,
-                child: Wrap(
-                  children: [
-                    Icon(
-                      CommunityMaterialIcons.check,
-                      color: Colors.blue,
-                    ),
-                    Text(' App Access'),
-                  ],
-                ),
-              ),
-              DropdownMenuItem(
-                value: UserFilter.writeAccess,
-                child: Wrap(
-                  children: [
-                    Icon(
-                      CommunityMaterialIcons.pencil,
-                      color: Colors.green,
-                    ),
-                    Text(' Write Access'),
-                  ],
-                ),
-              ),
-              DropdownMenuItem(
-                value: UserFilter.updateAccess,
-                child: Wrap(
-                  children: [
-                    Icon(
-                      CommunityMaterialIcons.update,
-                      color: Colors.orange,
-                    ),
-                    Text(' Update Access'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          SizedBox(width: 8.0), // Space between search bar and filter
+          _buildFilterPopupMenu(),
         ],
       ),
     );
+  }
+
+  Widget _buildFilterPopupMenu() {
+    return Obx(() {
+      Widget currentFilter = _getFilterName(userManagementController.selectedFilter.value);
+      return PopupMenuButton<UserFilter>(
+        icon: Row(
+          children: [
+            Icon(Icons.filter_list),
+            SizedBox(width: 4),
+            currentFilter,
+          ],
+        ),
+        onSelected: (UserFilter value) {
+          userManagementController.applyFilter(value);
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<UserFilter>>[
+          PopupMenuItem<UserFilter>(
+            value: UserFilter.all,
+            child: Text('All'),
+          ),
+          PopupMenuItem<UserFilter>(
+            value: UserFilter.superSu,
+            child: Wrap(
+              children: [
+                Icon(
+                  CommunityMaterialIcons.shield_account,
+                  color: Colors.red,
+                ),
+                Text(' Super User'),
+              ],
+            ),
+          ),
+          PopupMenuItem<UserFilter>(
+            value: UserFilter.appAccess,
+            child: Wrap(
+              children: [
+                Icon(
+                  CommunityMaterialIcons.check,
+                  color: Colors.blue,
+                ),
+                Text(' App Access'),
+              ],
+            ),
+          ),
+          PopupMenuItem<UserFilter>(
+            value: UserFilter.writeAccess,
+            child: Wrap(
+              children: [
+                Icon(
+                  CommunityMaterialIcons.pencil,
+                  color: Colors.green,
+                ),
+                Text(' Write Access'),
+              ],
+            ),
+          ),
+          PopupMenuItem<UserFilter>(
+            value: UserFilter.updateAccess,
+            child: Wrap(
+              children: [
+                Icon(
+                  CommunityMaterialIcons.update,
+                  color: Colors.orange,
+                ),
+                Text(' Update Access'),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _getFilterName(UserFilter filter) {
+    switch (filter) {
+      case UserFilter.all:
+        return SizedBox();
+      case UserFilter.superSu:
+        return Icon(CommunityMaterialIcons.shield_account,color: Colors.red,);
+      case UserFilter.appAccess:
+        return Icon(CommunityMaterialIcons.check,color: Colors.blue,);
+      case UserFilter.writeAccess:
+        return Icon(CommunityMaterialIcons.pencil,color: Colors.green,);
+      case UserFilter.updateAccess:
+        return Icon(CommunityMaterialIcons.update,color: Colors.orange,);
+      default:
+        return SizedBox();
+    }
   }
 }

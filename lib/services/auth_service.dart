@@ -1,5 +1,4 @@
 import 'dart:async'; // Add this import
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_norm.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_super_su.dart';
+import 'package:rk_distributor/screens/login_screen.dart';
 
 import '../screens/user_waiting_page.dart';
 
@@ -285,5 +285,6 @@ class AuthService extends GetxService {
     _userDocSubscription = null;
 
     Fluttertoast.showToast(msg: "Signed out");
+    Get.offAll(LoginScreen());
   }
 }
