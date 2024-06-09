@@ -274,6 +274,10 @@ class AuthService extends GetxService {
   }
 
   void signOut() async {
+    await _firestore
+        .collection('users')
+        .doc(user.value!['uid'])
+        .update({"loggedIn": false});
     await _auth.signOut();
     await _googleSignIn.signOut();
     _localStorage.remove('user');

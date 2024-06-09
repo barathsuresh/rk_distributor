@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
-import 'package:rk_distributor/screens/user_management_screen.dart';
+import 'package:rk_distributor/screens/Customer_Management_Screens/customer_management_screen.dart';
+import 'package:rk_distributor/screens/Product_Management_Screens/product_management_screen.dart';
+import 'package:rk_distributor/screens/User_Management_Screens/user_management_screen.dart';
 import 'package:rk_distributor/services/theme_service.dart';
 
 import 'custom_list_tile.dart';
@@ -36,22 +38,31 @@ class CustomNavigationDrawer extends StatelessWidget {
             ),
           ),
           CustomListTile(
-            leadingIcon: Icons.person,
-            title: 'User Management',
+            leadingIcon: Icons.security,
+            title: 'User Admin',
             onTap: () {
               Navigator.of(context).pop();
               Get.to(UserManagementScreen());
             },
-            subtitle: 'Manage Users',
+            subtitle: 'Manage Your Users',
           ),
           CustomListTile(
-            leadingIcon: Icons.person,
-            title: 'Product',
+            leadingIcon: CommunityMaterialIcons.tag,
+            title: 'Products',
             onTap: () {
               Navigator.of(context).pop();
-              Get.to(UserManagementScreen());
+              Get.to(ProductManagementScreen());
             },
-            subtitle: 'Manage Users',
+            subtitle: 'Manage Your Products',
+          ),
+          CustomListTile(
+            leadingIcon: Icons.account_circle,
+            title: 'Customers',
+            onTap: () {
+              Navigator.of(context).pop();
+              Get.to(CustomerManagementScreen());
+            },
+            subtitle: 'Manage Your Customers',
           ),
           CustomListTile(
             leadingIcon: Icons.settings,

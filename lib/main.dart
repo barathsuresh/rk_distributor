@@ -3,14 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:rk_distributor/constants/themes.dart';
+import 'package:rk_distributor/controllers/barcode_scan_controller.dart';
+import 'package:rk_distributor/controllers/customer_controller.dart';
+import 'package:rk_distributor/controllers/product_controller.dart';
 import 'package:rk_distributor/controllers/user_controller.dart';
 import 'package:rk_distributor/controllers/user_management_controller.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_norm.dart';
 import 'package:rk_distributor/screens/Home_Screens/home_screen_super_su.dart';
-import 'package:rk_distributor/screens/user_management_screen.dart';
+import 'package:rk_distributor/screens/User_Management_Screens/user_management_screen.dart';
 import 'package:rk_distributor/screens/user_waiting_page.dart';
 import 'package:rk_distributor/services/auth_service.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
+import 'package:rk_distributor/services/customer_service.dart';
+import 'package:rk_distributor/services/marketplace_service.dart';
+import 'package:rk_distributor/services/product_service.dart';
 import 'package:rk_distributor/services/theme_service.dart';
 
 import 'screens/login_screen.dart';
@@ -35,9 +41,15 @@ void _initializeGetStorage() async {
 void _startAppServices() {
   Get.lazyPut(() => AuthService(), fenix: true);
   Get.lazyPut(() => ThemeService(), fenix: true);
+  Get.lazyPut(() => ProductService(), fenix: true);
+  Get.lazyPut(() => CustomerService(), fenix: true);
+  Get.lazyPut(() => MarketplaceService(), fenix: true);
+
   Get.lazyPut(() => TextStyleController(), fenix: true);
   Get.lazyPut(() => UserManagementController(), fenix: true);
   Get.lazyPut(() => UserController(), fenix: true);
+  Get.lazyPut(() => BarcodeScanController(), fenix: true);
+  Get.lazyPut(() => ProductController(), fenix: true);
 }
 
 class MyApp extends StatelessWidget {

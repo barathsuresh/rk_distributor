@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/controllers/user_controller.dart';
 import 'package:rk_distributor/controllers/user_management_controller.dart';
-import 'package:rk_distributor/screens/about_user_screen.dart';
+import 'package:rk_distributor/screens/User_Management_Screens/about_user_screen.dart';
 import 'package:rk_distributor/widgets/custom_boxed_button.dart';
 import 'package:rk_distributor/widgets/custom_user_tile.dart';
 

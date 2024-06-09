@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rk_distributor/models/user_model.dart';
+import 'package:rk_distributor/utils/show_snackbar.dart';
 
 class UserController extends GetxController {
   var user = Rxn<UserModel>(); // User object to store user data
@@ -52,23 +53,9 @@ class UserController extends GetxController {
         'email': user.value!.email,
         'superSu': user.value!.superSu,
       });
-      Get.snackbar("Success", "User updated successfully",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
-    } catch (e) {
-      Get.snackbar("Error", "Failed to update user: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarCRUDSuccess(msg: "User updated successfully");
+    } on Exception catch (e) {
+      ShowSnackBar.showSnackBarException(e: e, msg: "Failed to update user");
     }
   }
 
@@ -79,34 +66,14 @@ class UserController extends GetxController {
           .doc(user.value!.uid)
           .update({'access.writeAccess': user.value!.writeAccess});
       if (user.value!.writeAccess) {
-        Get.snackbar(user.value!.name, "Granted Write Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Granted Write Access");
       } else {
-        Get.snackbar(user.value!.name, "Revoked Write Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Revoked Write Access");
       }
       return true;
     } on Exception catch (e) {
-      Get.snackbar(user.value!.name, "Unable to change Write Access: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarException(
+          e: e, msg: "Unable to change Write Access");
       return false;
     }
   }
@@ -118,34 +85,14 @@ class UserController extends GetxController {
           .doc(user.value!.uid)
           .update({'access.superSu': user.value!.superSu});
       if (user.value!.superSu) {
-        Get.snackbar(user.value!.name, "Granted SuperSu Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Granted SuperSu Access");
       } else {
-        Get.snackbar(user.value!.name, "Revoked SuperSu Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Revoked SuperSu Access");
       }
       return true;
     } on Exception catch (e) {
-      Get.snackbar(user.value!.name, "Unable to change SuperSu Access: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarException(
+          e: e, msg: "Unable to change SuperSu Access");
       return false;
     }
   }
@@ -157,34 +104,13 @@ class UserController extends GetxController {
           .doc(user.value!.uid)
           .update({'appAccess': user.value!.appAccess});
       if (user.value!.appAccess) {
-        Get.snackbar(user.value!.name, "Granted App Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Granted App Access");
       } else {
-        Get.snackbar(user.value!.name, "Revoked App Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Revoked App Access");
       }
       return true;
     } on Exception catch (e) {
-      Get.snackbar(user.value!.name, "Unable to change App Access: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarException(e: e, msg: "Unable to change App Access");
       return false;
     }
   }
@@ -196,34 +122,13 @@ class UserController extends GetxController {
           .doc(user.value!.uid)
           .update({'access.updateAccess': user.value!.updateAccess});
       if (user.value!.updateAccess) {
-        Get.snackbar(user.value!.name, "Granted Write Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+       ShowSnackBar.showSnackBarCRUDSuccess(msg: "Granted Write Access");
       } else {
-        Get.snackbar(user.value!.name, "Revoked Write Access",
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 2),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            animationDuration: Duration(milliseconds: 300),
-            margin: EdgeInsets.all(10));
+        ShowSnackBar.showSnackBarCRUDSuccess(msg: "Revoked Write Access");
       }
       return true;
     } on Exception catch (e) {
-      Get.snackbar(user.value!.name, "Unable to change Update Access: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarException(e: e, msg: "Unable to change Update Access");
       return false;
     }
   }

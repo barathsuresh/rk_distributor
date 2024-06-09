@@ -6,10 +6,12 @@ import 'package:badges/badges.dart' as badges;
 import 'package:rk_distributor/controllers/user_management_controller.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/models/user_model.dart';
-import 'package:rk_distributor/screens/about_user_screen.dart';
+import 'package:rk_distributor/screens/User_Management_Screens/about_user_screen.dart';
 import 'package:rk_distributor/screens/app_access_request_screen.dart';
 import 'package:rk_distributor/widgets/custom_search_bar.dart';
 import 'package:rk_distributor/widgets/custom_user_list_tile_mgmnt.dart';
+
+import '../../widgets/nothing_to_be_displayed.dart';
 
 class UserManagementScreen extends StatelessWidget {
   UserManagementScreen({Key? key});
@@ -47,7 +49,7 @@ class UserManagementScreen extends StatelessWidget {
         ],
         title: Row(
           children: [
-            Icon(Icons.people, size: 25),
+            Icon(Icons.security, size: 25),
             SizedBox(width: 8),
             Text(
               'Manage Users',
@@ -63,21 +65,7 @@ class UserManagementScreen extends StatelessWidget {
             child: Obx(
                   () {
                 return userManagementController.users.isEmpty
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 40,
-                      ),
-                      SizedBox(
-                        height: 9,
-                      ),
-                      Text("Nothing To Be Displayed")
-                    ],
-                  ),
-                )
+                    ? NothingToBeDisplayed()
                     : userManagementController.filteredUsers.isEmpty
                     ? Center(
                   child: Column(

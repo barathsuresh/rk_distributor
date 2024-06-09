@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rk_distributor/models/user_model.dart';
+import 'package:rk_distributor/utils/show_snackbar.dart';
 
 import '../services/auth_service.dart';
 
@@ -50,23 +51,9 @@ class UserManagementController extends GetxController {
           .collection('users')
           .doc(user.uid)
           .delete();
-      Get.snackbar("Success", "Deleted the user",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarCRUDSuccess(msg: "Deleted the User");
     } on Exception catch (e) {
-      Get.snackbar("Error", "Unable to delete the user: $e",
-          snackPosition: SnackPosition.TOP,
-          duration: Duration(seconds: 2),
-          snackStyle: SnackStyle.FLOATING,
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          animationDuration: Duration(milliseconds: 300),
-          margin: EdgeInsets.all(10));
+      ShowSnackBar.showSnackBarException(e: e, msg: "Unable to delete user");
     }
   }
 

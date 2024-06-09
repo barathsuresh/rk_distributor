@@ -14,7 +14,7 @@ import 'package:rk_distributor/services/theme_service.dart';
 import 'package:rk_distributor/widgets/custom_dialog_box.dart';
 import 'package:rk_distributor/widgets/custom_list_tile.dart';
 
-import '../models/user_model.dart';
+import '../../models/user_model.dart';
 
 class AboutUserScreen extends StatelessWidget {
   AboutUserScreen({required this.user});
@@ -235,7 +235,8 @@ class AboutUserScreen extends StatelessWidget {
             CommunityMaterialIcons.logout,
           ),
           onTap: () {
-            // Implement logout functionality here
+            // TODO: Implement logout functionality here
+
           },
           leadingIcon: CommunityMaterialIcons.logout,
           subtitle: 'Remotely log out the user.',
@@ -250,7 +251,8 @@ class AboutUserScreen extends StatelessWidget {
               textStyleController.userListTileSubtitleStyle.value,
           title: 'Delete User',
           onTap: () {
-            // Implement delete functionality here
+            // TODO: Implement delete functionality here
+
           },
           leadingIcon: CommunityMaterialIcons.account_remove,
           subtitle: 'All Data Related to this user will be deleted.',

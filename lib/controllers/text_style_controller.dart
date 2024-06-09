@@ -18,8 +18,10 @@ class TextStyleController extends GetxController {
   final userProfileEmailStyle = Rxn<TextStyle>();
   final floatingActionButtonStyle = Rxn<TextStyle>();
   final h3InAboutUserStyle = Rxn<TextStyle>();
-
+  final italicListSubtitleStyle = Rxn<TextStyle>();
   final h2CommonStyleBold = Rxn<TextStyle>();
+  final h2CommonStyleBoldRoboto = Rxn<TextStyle>();
+  final bottomNavBarTexStyle = Rxn<TextStyle>();
   @override
   void onInit() {
     super.onInit();
@@ -40,10 +42,10 @@ class TextStyleController extends GetxController {
     appBarTextStyle.value = GoogleFonts.sourceCodePro(
         color: textColor, fontSize: 20, fontWeight: FontWeight.bold);
 
-    listTileTextTileStyle.value = GoogleFonts.sourceCodePro(
+    listTileTextTileStyle.value = GoogleFonts.roboto(
         color: textColor, fontSize: 20, fontWeight: FontWeight.bold);
     listTileTextSubtitleStyle.value =
-        GoogleFonts.sourceCodePro(color: textColor);
+        GoogleFonts.roboto(color: textColor);
 
     nothingToBeDisplayedStyle.value = GoogleFonts.roboto(color: textColor);
 
@@ -51,14 +53,19 @@ class TextStyleController extends GetxController {
         GoogleFonts.roboto(color: textColor, fontSize: 20,fontWeight: FontWeight.bold);
     userListTileSubtitleStyle.value = GoogleFonts.roboto(color: textColor,fontSize: 11,);
 
-    userProfileNameStyle.value = GoogleFonts.archivoBlack(fontSize: 25,color: textColor);
+    userProfileNameStyle.value = GoogleFonts.roboto(fontSize: 25,color: textColor,fontWeight: FontWeight.bold);
     userProfileEmailStyle.value = GoogleFonts.roboto(fontSize: 10,color: textColor,fontWeight: FontWeight.w700);
 
     floatingActionButtonStyle.value = GoogleFonts.roboto(fontSize: 15);
 
     h3InAboutUserStyle.value = GoogleFonts.montserrat(fontSize: 20);
 
+    italicListSubtitleStyle.value = GoogleFonts.roboto(color: textColor,fontStyle: FontStyle.italic);
 
     h2CommonStyleBold.value = GoogleFonts.montserrat(fontSize: 24,color: textColor,fontWeight: FontWeight.bold);
+
+    h2CommonStyleBoldRoboto.value = GoogleFonts.roboto(fontSize: 18,color: textColor,fontWeight: FontWeight.bold);
+
+    bottomNavBarTexStyle.value = GoogleFonts.roboto();
   }
 }

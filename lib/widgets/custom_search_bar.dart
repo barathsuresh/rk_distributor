@@ -7,12 +7,14 @@ class CustomSearchBar extends StatefulWidget {
   final FocusNode searchFocusNode;
   final Function(String) onChanged;
   final Function() onClear;
+  final String? hintText;
 
   CustomSearchBar({
     required this.searchController,
     required this.searchFocusNode,
     required this.onChanged,
     required this.onClear,
+    this.hintText
   });
 
   @override
@@ -50,7 +52,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         controller: widget.searchController,
         focusNode: widget.searchFocusNode,
         decoration: InputDecoration(
-          hintText: 'Search users...',
+          hintText: widget.hintText ?? 'Search',
           hintStyle: TextStyle(
             color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
