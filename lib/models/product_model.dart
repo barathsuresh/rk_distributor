@@ -1,18 +1,50 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
 
-class Product {
+part 'product_model.g.dart';
+
+@HiveType(typeId: 0)
+class Product extends HiveObject {
+  @HiveField(0)
   String id;
+
+  @HiveField(1)
   String name;
+
+  @HiveField(2)
   String? brand;
+
+  @HiveField(3)
   String? description;
+
+  @HiveField(4)
+  String unit;
+
+  @HiveField(5)
   String category;
+
+  @HiveField(6)
   double mrp;
+
+  @HiveField(7)
   OurPrice ourPrice;
+
+  @HiveField(8)
   int orderFrequency;
+
+  @HiveField(9)
   String? createdBy;
+
+  @HiveField(10)
   String? modifiedBy;
+
+  @HiveField(11)
   String? lastOrderedOrderId;
+
+  @HiveField(12)
   String addedOn;
+
+  @HiveField(13)
   String modifiedOn;
 
   Product({
@@ -20,6 +52,7 @@ class Product {
     required this.name,
     this.brand,
     this.description,
+    required this.unit,
     required this.category,
     required this.mrp,
     required this.ourPrice,
@@ -37,6 +70,7 @@ class Product {
       name: json['name'],
       brand: json['brand'],
       description: json['description'],
+      unit: json['unit'],
       category: json['category'],
       mrp: json['MRP']?.toDouble() ?? 0.0,
       ourPrice: OurPrice.fromJson(json['ourPrice']),
@@ -60,7 +94,8 @@ class Product {
       'name': name,
       'brand': brand,
       'description': description,
-      'category':category,
+      'unit': unit,
+      'category': category,
       'MRP': mrp,
       'ourPrice': ourPrice.toJson(),
       'orderFrequency': orderFrequency,
@@ -77,9 +112,15 @@ class Product {
   }
 }
 
+@HiveType(typeId: 1)
 class OurPrice {
+  @HiveField(0)
   double common;
+
+  @HiveField(1)
   List<AreaPrice> area;
+
+  @HiveField(2)
   List<CustomerPrice> customerPrices;
 
   OurPrice({
@@ -93,9 +134,9 @@ class OurPrice {
     var companyPricesFromJson = json['customerPrices'] as List;
 
     List<AreaPrice> areaList =
-        areaFromJson.map((i) => AreaPrice.fromJson(i)).toList();
+    areaFromJson.map((i) => AreaPrice.fromJson(i)).toList();
     List<CustomerPrice> companyPriceList =
-        companyPricesFromJson.map((i) => CustomerPrice.fromJson(i)).toList();
+    companyPricesFromJson.map((i) => CustomerPrice.fromJson(i)).toList();
 
     return OurPrice(
       common: json['common']?.toDouble() ?? 0.0,
@@ -106,9 +147,9 @@ class OurPrice {
 
   Map<String, dynamic> toJson() {
     List<Map<String, dynamic>> areaToJson =
-        area.map((i) => i.toJson()).toList();
+    area.map((i) => i.toJson()).toList();
     List<Map<String, dynamic>> companyPricesToJson =
-        customerPrices.map((i) => i.toJson()).toList();
+    customerPrices.map((i) => i.toJson()).toList();
 
     return {
       'common': common,
@@ -118,8 +159,12 @@ class OurPrice {
   }
 }
 
+@HiveType(typeId: 2)
 class AreaPrice {
+  @HiveField(0)
   String name;
+
+  @HiveField(1)
   double price;
 
   AreaPrice({
@@ -142,8 +187,12 @@ class AreaPrice {
   }
 }
 
+@HiveType(typeId: 3)
 class CustomerPrice {
+  @HiveField(0)
   String customerId;
+
+  @HiveField(1)
   double price;
 
   CustomerPrice({

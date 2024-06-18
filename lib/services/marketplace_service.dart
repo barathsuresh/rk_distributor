@@ -1,12 +1,16 @@
-import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:rk_distributor/services/customer_service.dart';
+import 'package:rk_distributor/services/product_service.dart';
+
 import '../models/product_model.dart';
-import 'product_service.dart';
-import 'customer_service.dart';
 
 class MarketplaceService extends GetxService {
   final ProductService productService = Get.find<ProductService>();
   final CustomerService customerService = Get.find<CustomerService>();
+
+  final TextEditingController searchController = TextEditingController();
 
   var searchQuery = ''.obs;
   var selectedCategory = 'All'.obs;
@@ -36,37 +40,46 @@ class MarketplaceService extends GetxService {
     ever(selectedCustomer, (_) => filterProducts());
   }
 
+  // @override
+  // void onClose() {
+  //   // TODO: implement onClose
+  //   super.onClose();
+  //   lastDocument=null;
+  // }
+
   void fetchInitialProducts() async {
-    isLoading.value = true;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('products')
-        .limit(productsPerPage)
-        .get();
-    lastDocument = querySnapshot.docs.isEmpty ? null : querySnapshot.docs.last;
-    allProducts.value = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
-    filterProducts();
-    isLoading.value = false;
+    try {
+      isLoading.value = true;
+      QuerySnapshot querySnapshot = await productService.getProductsPaged(null, 20);
+      lastDocument = querySnapshot.docs.isEmpty ? null : querySnapshot.docs.last;
+      allProducts.value = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
+      filterProducts();
+    } catch (e) {
+      print('Error fetching initial products: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void fetchMoreProducts() async {
-    if (isLoading.value || lastDocument == null) return;
+    if (lastDocument == null) return;
 
-    isLoading.value = true;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('products')
-        .startAfterDocument(lastDocument!)
-        .limit(productsPerPage)
-        .get();
+    try {
+      isLoading.value = true;
+      QuerySnapshot querySnapshot = await productService.getProductsPaged(lastDocument, 20);
 
-    if (querySnapshot.docs.isNotEmpty) {
-      lastDocument = querySnapshot.docs.last;
-      allProducts.addAll(querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList());
-      filterProducts();
-    } else {
-      lastDocument = null; // No more documents left
+      if (querySnapshot.docs.isNotEmpty) {
+        lastDocument = querySnapshot.docs.last;
+        allProducts.addAll(querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList());
+        filterProducts();
+      } else {
+        lastDocument = null; // No more documents left
+      }
+    } catch (e) {
+      print('Error fetching more products: $e');
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   void filterProducts() {
@@ -78,7 +91,7 @@ class MarketplaceService extends GetxService {
   }
 
   void onSearchChanged(String? query) {
-    searchQuery.value = query ?? '';
+    searchQuery.value = searchController.text ?? '';
     filterProducts();
   }
 
@@ -98,4 +111,5 @@ class MarketplaceService extends GetxService {
   void onAreaChanged(String? area) {
     selectedArea.value = area ?? '';
   }
+
 }

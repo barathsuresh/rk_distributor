@@ -18,6 +18,8 @@ class ProductController extends GetxController {
   final areaPrices = <AreaPrice>[].obs;
   final customerPrices = <CustomerPrice>[].obs;
 
+  final selectedUnit = ''.obs;
+
   void addAreaPrice() {
     // Check if the area price to be added is not already present
     if (!isAreaPriceAlreadyAdded()) {
@@ -37,6 +39,7 @@ class ProductController extends GetxController {
     brandController.clear();
     descriptionController.clear();
     mrpController.clear();
+    selectedUnit.value = '';
     commonPriceController.clear();
     categoryController.clear();
     areaPrices.clear();

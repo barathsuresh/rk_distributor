@@ -6,7 +6,7 @@ class CustomSearchBar extends StatefulWidget {
   final TextEditingController searchController;
   final FocusNode searchFocusNode;
   final Function(String) onChanged;
-  final Function() onClear;
+  final Function onClear;
   final String? hintText;
 
   CustomSearchBar({

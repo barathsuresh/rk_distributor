@@ -16,12 +16,17 @@ class CustomerService extends GetxService {
   late StreamSubscription _customerSubscription;
 
   @override
-  void onInit() {
+  void onInit() async{
     super.onInit();
-    _startCustomerListener();
+    await _startCustomerListener();
   }
 
-  void _startCustomerListener() {
+  Future<CustomerService> init() async {
+    await _startCustomerListener();
+    return this;
+  }
+
+  Future<void> _startCustomerListener() async {
     _customerSubscription =
         _firestore.collection('customers').snapshots().listen((querySnapshot) {
       final customerList =
