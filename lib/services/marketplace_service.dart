@@ -7,6 +7,8 @@ import 'package:rk_distributor/services/product_service.dart';
 import '../models/product_model.dart';
 
 class MarketplaceService extends GetxService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final ProductService productService = Get.find<ProductService>();
   final CustomerService customerService = Get.find<CustomerService>();
 
@@ -28,8 +30,7 @@ class MarketplaceService extends GetxService {
   void onInit() {
     super.onInit();
     // Observing the product list from ProductService for real-time updates
-    ever(productService.products, (_) {
-      allProducts.assignAll(productService.products);
+    ever(allProducts, (_) {
       filterProducts();
     });
     fetchInitialProducts();
@@ -50,7 +51,7 @@ class MarketplaceService extends GetxService {
   void fetchInitialProducts() async {
     try {
       isLoading.value = true;
-      QuerySnapshot querySnapshot = await productService.getProductsPaged(null, 20);
+      QuerySnapshot querySnapshot = await getProductsPaged(20);
       lastDocument = querySnapshot.docs.isEmpty ? null : querySnapshot.docs.last;
       allProducts.value = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
       filterProducts();
@@ -66,7 +67,7 @@ class MarketplaceService extends GetxService {
 
     try {
       isLoading.value = true;
-      QuerySnapshot querySnapshot = await productService.getProductsPaged(lastDocument, 20);
+      QuerySnapshot querySnapshot = await getProductsPaged(20);
 
       if (querySnapshot.docs.isNotEmpty) {
         lastDocument = querySnapshot.docs.last;
@@ -88,6 +89,14 @@ class MarketplaceService extends GetxService {
       final matchesCategory = selectedCategory.value == 'All' || product.category == selectedCategory.value;
       return matchesSearch && matchesCategory;
     }).toList();
+  }
+
+  Future<QuerySnapshot> getProductsPaged(int limit) async{
+    Query query = _firestore.collection('products').limit(limit);
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument!);
+    }
+    return query.get();
   }
 
   void onSearchChanged(String? query) {

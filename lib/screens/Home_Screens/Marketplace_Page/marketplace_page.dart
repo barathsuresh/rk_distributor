@@ -1,92 +1,94 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:rk_distributor/api/barcode_img_link_provider.dart';
+import 'package:rk_distributor/controllers/marketplace_controller.dart';
+import 'package:rk_distributor/models/product_model.dart';
+import 'package:rk_distributor/services/marketplace_service.dart';
 import 'package:rk_distributor/services/theme_service.dart';
 import 'package:rk_distributor/widgets/custom_search_bar.dart';
 
-import '../../../services/marketplace_service.dart';
-import '../../../models/product_model.dart';
+import '../../../api/barcode_img_link_provider.dart';
 
-class MarketplacePage extends StatelessWidget {
-  MarketplacePage({super.key});
-
-  final ThemeService themeService = Get.find();
+class MarketPlacePage extends StatelessWidget {
   final MarketplaceService marketPlaceService = Get.find();
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final ThemeService themeService = Get.find();
+  final MarketplaceController marketplaceController = Get.find();
+
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
     bool _isScrollingDown = false;
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
+    marketplaceController.scrollController.addListener(() {
+      if (marketplaceController.scrollController.position.userScrollDirection ==
           ScrollDirection.reverse) {
         // User is scrolling down
         if (!_isScrollingDown) {
           _isScrollingDown = true;
+          marketplaceController.showCart(false);
         }
       } else {
         // User is scrolling up
         if (_isScrollingDown) {
           _isScrollingDown = false;
+          marketplaceController.showCart(true);
         }
       }
       // Check if scroll position is at maximum extent
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (marketplaceController.scrollController.position.pixels ==
+          marketplaceController.scrollController.position.maxScrollExtent) {
+        marketPlaceService.fetchMoreProducts();
       }
     });
-
-    return Scaffold(
-      floatingActionButton: true
-          ? FloatingActionButton(
-        onPressed: () {},
-        child: Badge(label: Text("1"), child: Icon(Icons.shopping_cart)),
-      )
-          : SizedBox.shrink(),
-      body: Column(
-        children: [
-          _buildSearchBar(marketPlaceService),
-          _buildFilterOptions(marketPlaceService, context),
-          _buildCustomerSelection(marketPlaceService, context),
-          _buildPriceSelection(marketPlaceService, context),
-          Expanded(child: _buildProductList(marketPlaceService)),
-          Obx(() {
-            return marketPlaceService.isLoading.value
+    return Obx(
+      () => Scaffold(
+        floatingActionButton: marketplaceController.showFAB.value
+            ? FloatingActionButton(
+                onPressed: () {},
+                child:
+                    Badge(label: Text("1"), child: Icon(Icons.shopping_cart)),
+              )
+            : SizedBox.shrink(),
+        body: Column(
+          children: [
+            Text(marketPlaceService.displayedProducts.length.toString()),
+            _buildSearchBar(),
+            _buildFilterOptions(context),
+            _buildCustomerSelection(context),
+            _buildPriceSelection(context),
+            Expanded(child: _buildProductList()),
+            marketPlaceService.isLoading.value
                 ? LoadingAnimationWidget.staggeredDotsWave(
-              color: themeService.isDarkMode.value
-                  ? Colors.white
-                  : Colors.black,
-              size: MediaQuery.of(context).size.width * 0.15,
-            )
-                : SizedBox.shrink();
-          }),
-        ],
+                    color: themeService.isDarkMode.value
+                        ? Colors.white
+                        : Colors.black,
+                    size: MediaQuery.of(context).size.width * 0.15,
+                  )
+                : SizedBox.shrink()
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSearchBar(MarketplaceService service) {
+  Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: CustomSearchBar(
-        searchController: service.searchController,
-        searchFocusNode: _focusNode,
-        onChanged: service.onSearchChanged,
+        searchController: marketPlaceService.searchController,
+        onChanged: marketPlaceService.onSearchChanged,
         onClear: () {
-          service.searchController.clear();
-          service.onSearchChanged('');
+          marketPlaceService.searchController.clear();
+          marketPlaceService.onSearchChanged('');
         },
+        searchFocusNode: FocusNode(),
       ),
     );
   }
 
-  Widget _buildFilterOptions(MarketplaceService service, BuildContext context) {
+  Widget _buildFilterOptions(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -95,23 +97,23 @@ class MarketplacePage extends StatelessWidget {
           Text('Filter by Category:'),
           Obx(() {
             return DropdownButton<String>(
-              menuMaxHeight: MediaQuery.of(context).size.height * 0.45,
-              value: service.selectedCategory.value,
-              items: ['All', ...service.productService.categories]
+              value: marketPlaceService.selectedCategory.value,
+              items: ['All', ...marketPlaceService.productService.categories]
                   .map((category) => DropdownMenuItem<String>(
-                value: category,
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: Text(
-                      category,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )),
-              ))
+                        value: category,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: Text(
+                            category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ))
                   .toList(),
               onChanged: (String? value) {
                 if (value != null) {
-                  service.onCategoryChanged(value);
+                  marketPlaceService.onCategoryChanged(value);
                 }
               },
             );
@@ -121,8 +123,7 @@ class MarketplacePage extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomerSelection(
-      MarketplaceService service, BuildContext context) {
+  Widget _buildCustomerSelection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -131,12 +132,12 @@ class MarketplacePage extends StatelessWidget {
           Text('Select Customer:'),
           Obx(() {
             return DropdownButton<String>(
-              menuMaxHeight: MediaQuery.of(context).size.height * 0.45,
-              value: service.selectedCustomer.value.isEmpty
+              value: marketPlaceService.selectedCustomer.value.isEmpty
                   ? null
-                  : service.selectedCustomer.value,
+                  : marketPlaceService.selectedCustomer.value,
               hint: Text('Select Customer'),
-              items: service.customerService.customers.map((customer) {
+              items:
+                  marketPlaceService.customerService.customers.map((customer) {
                 return DropdownMenuItem<String>(
                   value: customer.id,
                   child: SizedBox(
@@ -147,7 +148,7 @@ class MarketplacePage extends StatelessWidget {
               }).toList(),
               onChanged: (String? value) {
                 if (value != null) {
-                  service.onCustomerChanged(value);
+                  marketPlaceService.onCustomerChanged(value);
                 }
               },
             );
@@ -157,73 +158,59 @@ class MarketplacePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceSelection(
-      MarketplaceService service, BuildContext context) {
+  Widget _buildPriceSelection(BuildContext context) {
     return Obx(() {
-      return service.selectedCustomer.value.isEmpty
+      return marketPlaceService.selectedCustomer.value.isEmpty
           ? Container()
           : Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Text('View Price By:'),
-          DropdownButton<String>(
-            value: service.priceSelection.value,
-            items: ['Common', 'Area', 'Customer']
-                .map((option) => DropdownMenuItem<String>(
-              value: option,
-              child: Text(option),
-            ))
-                .toList(),
-            onChanged: (String? value) {
-              if (value != null) {
-                service.onPriceSelectionChanged(value);
-                service
-                    .filterProducts(); // Ensure filtering is updated on price selection change
-              }
-            },
-          ),
-          service.priceSelection.value == 'Area'
-              ? DropdownButton<String>(
-            menuMaxHeight:
-            MediaQuery.of(context).size.height * 0.45,
-            value: service.selectedArea.value.isEmpty
-                ? null
-                : service.selectedArea.value,
-            hint: Text('Select Area'),
-            items: service.customerService.areaList.map((area) {
-              return DropdownMenuItem<String>(
-                value: area,
-                child: Text(area),
-              );
-            }).toList(),
-            onChanged: (String? value) {
-              if (value != null) {
-                service.onAreaChanged(value);
-                service
-                    .filterProducts(); // Ensure filtering is updated on area change
-              }
-            },
-          )
-              : Container(),
-        ],
-      );
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('View Price By:'),
+                DropdownButton<String>(
+                  value: marketPlaceService.priceSelection.value,
+                  items: ['Common', 'Area', 'Customer']
+                      .map((option) => DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(option),
+                          ))
+                      .toList(),
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      marketPlaceService.onPriceSelectionChanged(value);
+                    }
+                  },
+                ),
+                if (marketPlaceService.priceSelection.value == 'Area')
+                  DropdownButton<String>(
+                    value: marketPlaceService.selectedArea.value.isEmpty
+                        ? null
+                        : marketPlaceService.selectedArea.value,
+                    hint: Text('Select Area'),
+                    items: marketPlaceService.customerService.areaList
+                        .map((area) => DropdownMenuItem<String>(
+                              value: area,
+                              child: Text(area),
+                            ))
+                        .toList(),
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        marketPlaceService.onAreaChanged(value);
+                      }
+                    },
+                  ),
+              ],
+            );
     });
   }
 
-  Widget _buildProductList(MarketplaceService service) {
+  Widget _buildProductList() {
     return Obx(() {
       return ListView.builder(
-        controller: ScrollController()..addListener(() {
-          if (service.isLoading.value) return;
-          if ((service.displayedProducts.length) <
-              service.allProducts.length) {
-            service.fetchMoreProducts();
-          }
-        }),
-        itemCount: service.displayedProducts.length,
+        controller: marketplaceController.scrollController,
+        itemCount: marketPlaceService.displayedProducts.length,
         itemBuilder: (context, index) {
-          final product = service.displayedProducts[index];
-          final ourPrice = _getOurPrice(service, product);
+          final product = marketPlaceService.displayedProducts[index];
+          final ourPrice = _getOurPrice(marketPlaceService, product);
 
           return _buildProductCard(product, ourPrice);
         },
@@ -283,6 +270,25 @@ class MarketplacePage extends StatelessWidget {
               overflow: TextOverflow.clip,
             ),
             SizedBox(height: 4.0),
+            Text.rich(
+              TextSpan(
+                text: 'Weight: ',
+                style: GoogleFonts.roboto(
+                  fontWeight: FontWeight.w900,
+                ),
+                children: [
+                  TextSpan(
+                    text:
+                        '${product.weigh.weight.toStringAsFixed(1)} ${product.weigh.unit}',
+                    style: GoogleFonts.roboto(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              overflow: TextOverflow.clip,
+            ),
+            SizedBox(height: 4.0),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Text.rich(
@@ -294,7 +300,8 @@ class MarketplacePage extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: '${product.mrp.toStringAsFixed(2)} / ${product.unit}',
+                      text:
+                          '${product.mrp.toStringAsFixed(2)} / ${product.unit}',
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w400,
                       ),
@@ -341,23 +348,20 @@ class MarketplacePage extends StatelessWidget {
     );
   }
 
-
-
-
   double _getOurPrice(MarketplaceService service, Product product) {
     if (service.priceSelection.value == 'Common') {
       return product.ourPrice.common;
     } else if (service.priceSelection.value == 'Area' &&
         service.selectedArea.value.isNotEmpty) {
       final areaPrice = product.ourPrice.area.firstWhere(
-            (area) => area.name == service.selectedArea.value,
+        (area) => area.name == service.selectedArea.value,
         orElse: () => AreaPrice(name: '', price: product.ourPrice.common),
       );
       return areaPrice.price;
     } else if (service.priceSelection.value == 'Customer' &&
         service.selectedCustomer.value.isNotEmpty) {
       final customerPrice = product.ourPrice.customerPrices.firstWhere(
-            (cp) => cp.customerId == service.selectedCustomer.value,
+        (cp) => cp.customerId == service.selectedCustomer.value,
         orElse: () => CustomerPrice(
             customerId: '', price: _getAreaOrCommonPrice(service, product)),
       );
@@ -368,9 +372,9 @@ class MarketplacePage extends StatelessWidget {
 
   double _getAreaOrCommonPrice(MarketplaceService service, Product product) {
     final customer = service.customerService.customers.firstWhere(
-            (customer) => customer.id == service.selectedCustomer.value);
+        (customer) => customer.id == service.selectedCustomer.value);
     final areaPrice = product.ourPrice.area.firstWhere(
-          (area) => area.name == customer.area,
+      (area) => area.name == customer.area,
       orElse: () => AreaPrice(name: '', price: product.ourPrice.common),
     );
     return areaPrice.price;

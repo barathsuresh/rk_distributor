@@ -106,6 +106,58 @@ class AddProductScreen extends StatelessWidget {
           );
         }),
         SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: productController.weightController,
+                decoration: InputDecoration(
+                  labelText: 'Weight',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Weight';
+                  }
+                  return null;
+                },
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            SizedBox(width: 5,),
+            Expanded(
+              child: SizedBox(
+                width: 50,
+                child: DropdownButtonFormField<String>(
+                  value: productController.selectedWeightUnit.value.isEmpty
+                      ? null
+                      : productController.selectedWeightUnit.value,
+                  decoration: InputDecoration(
+                    labelText: 'Weight Unit',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: productService.weightUnits.map((String unit) {
+                    return DropdownMenuItem<String>(
+                      value: unit,
+                      child: SizedBox(width: 35, child: Text(unit)),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    productController.selectedWeightUnit.value = newValue ?? '';
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a Unit';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            )
+          ],
+        ),
+        SizedBox(height: 16),
         TextFormField(
           controller: productController.mrpController,
           decoration: InputDecoration(
@@ -376,6 +428,7 @@ class AddProductScreen extends StatelessWidget {
                             DateTime.now().microsecondsSinceEpoch.toString(),
                         modifiedOn:
                             DateTime.now().microsecondsSinceEpoch.toString(),
+                        weigh: Weight(weight: double.parse(productController.weightController.text), unit: productController.selectedWeightUnit.value),
                       );
                       productService.addProduct(product);
                       Get.back();

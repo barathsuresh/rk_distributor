@@ -6,34 +6,31 @@ import '../utils/show_snackbar.dart';
 
 class ProductService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Box<Product> _productBox = Hive.box<Product>('products');
 
-  final RxList<Product> products = <Product>[].obs;
+  // final RxList<Product> products = <Product>[].obs;
   final RxList<String> categories = <String>[].obs;
   final RxList<String> units = <String>[].obs;
+  final RxList<String> weightUnits = <String>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadCachedProducts();
-    _startProductListener();
+    // _startProductListener();
     _startCategoryListener();
     _fetchCategories();
+    _fetchUnits();
+    _fetchWeightUnits();
     _startUnitsListener();
+    _startWeightUnitsListener();
   }
 
-  void _loadCachedProducts() {
-    products.assignAll(_productBox.values.toList());
-  }
-
-  void _startProductListener() {
-    _firestore.collection('products').snapshots().listen((querySnapshot) {
-      final productList = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
-      products.assignAll(productList);
-      _cacheProducts(productList);
-      _updateCategories(productList);
-    });
-  }
+  // void _startProductListener() {
+  //   _firestore.collection('products').snapshots().listen((querySnapshot) {
+  //     final productList = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
+  //     products.assignAll(productList);
+  //     _updateCategories(productList);
+  //   });
+  // }
 
   void _startCategoryListener() {
     _firestore.collection('categories').doc('categories').snapshots().listen((documentSnapshot) {
@@ -44,6 +41,12 @@ class ProductService extends GetxService {
   void _startUnitsListener() {
     _firestore.collection('units').doc('units').snapshots().listen((documentSnapshot) {
       _fetchUnits();
+    });
+  }
+
+  void _startWeightUnitsListener() {
+    _firestore.collection('weightUnits').doc('weightUnits').snapshots().listen((documentSnapshot) {
+      _fetchWeightUnits();
     });
   }
 
@@ -75,6 +78,20 @@ class ProductService extends GetxService {
     });
   }
 
+  void _fetchWeightUnits() {
+    _firestore.collection('weightUnits').doc('weightUnits').get().then((DocumentSnapshot doc) {
+      if (doc.exists) {
+        final dynamic data = doc.data();
+        if (data != null && data['weightUnits'] != null) {
+          final List<dynamic> unitsList = data['weightUnits'];
+          weightUnits.assignAll(unitsList.map((unit) => unit.toString()).toList());
+        }
+      }
+    }).catchError((error) {
+      print('Failed to fetch weight units: $error');
+    });
+  }
+
   void _updateCategories(List<Product> productList) {
     Set<String> allCategories = {};
     for (var product in productList) {
@@ -102,12 +119,6 @@ class ProductService extends GetxService {
     }
   }
 
-  void _cacheProducts(List<Product> productList) async {
-    await _productBox.clear();
-    for (var product in productList) {
-      await _productBox.put(product.id, product);
-    }
-  }
 
   Future<void> addUnit(String unit) async {
     try {
@@ -120,6 +131,17 @@ class ProductService extends GetxService {
     }
   }
 
+  Future<void> addWeightUnit(String unit) async {
+    try {
+      await _firestore.collection('weightUnits').doc('weightUnits').update({
+        'weightUnits': FieldValue.arrayUnion([unit]),
+      });
+      ShowSnackBar.showSnackBarCRUDSuccess(msg: "Weight Unit Added Successfully");
+    } on Exception catch (e) {
+      ShowSnackBar.showSnackBarException(e: e, msg: 'Failed to add Weight Unit');
+    }
+  }
+
   Future<void> deleteUnit(String unit) async {
     try {
       await _firestore.collection('units').doc('units').update({
@@ -127,6 +149,18 @@ class ProductService extends GetxService {
       });
       units.remove(unit);
       ShowSnackBar.showSnackBarCRUDSuccess(msg: "Unit Deleted Successfully");
+    } on Exception catch (e) {
+      ShowSnackBar.showSnackBarException(e: e, msg: 'Failed to delete unit');
+    }
+  }
+
+  Future<void> deleteWeightUnit(String unit) async {
+    try {
+      await _firestore.collection('weightUnits').doc('weightUnits').update({
+        'weightUnits': FieldValue.arrayRemove([unit]),
+      });
+      units.remove(unit);
+      ShowSnackBar.showSnackBarCRUDSuccess(msg: "Weight Unit Deleted Successfully");
     } on Exception catch (e) {
       ShowSnackBar.showSnackBarException(e: e, msg: 'Failed to delete unit');
     }
@@ -164,10 +198,10 @@ class ProductService extends GetxService {
     }
   }
 
-  Future<void> deleteProduct(String id, String category) async {
+  Future<void> deleteProduct(Product product) async {
     try {
-      await _firestore.collection('products').doc(id).delete();
-      _removeCategoryIfEmpty(category);
+      await _firestore.collection('products').doc(product.id).delete();
+      _removeCategoryIfEmpty(product.category);
       ShowSnackBar.showSnackBarCRUDSuccess(msg: 'Deleted Product Successfully');
     } on Exception catch (e) {
       ShowSnackBar.showSnackBarException(e: e, msg: 'Failed to delete product');
@@ -175,8 +209,8 @@ class ProductService extends GetxService {
   }
 
   Future<void> _removeCategoryIfEmpty(String category) async {
-    final categoryProducts = products.where((product) => product.category == category).toList();
-    if (categoryProducts.isEmpty) {
+    QuerySnapshot categoryProducts = await _firestore.collection('products').where('category', isEqualTo: category).get();
+    if (categoryProducts.docs.isEmpty) {
       await _removeCategory(category);
     }
   }
@@ -234,11 +268,4 @@ class ProductService extends GetxService {
     }
   }
 
-  Future<QuerySnapshot> getProductsPaged(DocumentSnapshot? lastDocument, int limit) {
-    Query query = _firestore.collection('products').limit(limit);
-    if (lastDocument != null) {
-      query = query.startAfterDocument(lastDocument);
-    }
-    return query.get();
-  }
 }

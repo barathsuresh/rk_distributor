@@ -31,7 +31,7 @@ class _HomeScreenSuperSuState extends State<HomeScreenSuperSu> {
 
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [Homepage(), MarketplacePage(), AnalyticsPage()];
+  final List<Widget> _pages = [Homepage(), MarketPlacePage(), AnalyticsPage()];
 
   void _onItemTapped(int index) {
     setState(() {

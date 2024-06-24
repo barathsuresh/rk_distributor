@@ -12,6 +12,7 @@ class ProductController extends GetxController {
   final mrpController = TextEditingController();
   final commonPriceController = TextEditingController();
   final categoryController = TextEditingController();
+  final weightController = TextEditingController();
 
   final customerService = Get.find<CustomerService>();
 
@@ -19,6 +20,7 @@ class ProductController extends GetxController {
   final customerPrices = <CustomerPrice>[].obs;
 
   final selectedUnit = ''.obs;
+  final selectedWeightUnit = ''.obs;
 
   void addAreaPrice() {
     // Check if the area price to be added is not already present
@@ -40,6 +42,7 @@ class ProductController extends GetxController {
     descriptionController.clear();
     mrpController.clear();
     selectedUnit.value = '';
+    selectedWeightUnit.value = '';
     commonPriceController.clear();
     categoryController.clear();
     areaPrices.clear();

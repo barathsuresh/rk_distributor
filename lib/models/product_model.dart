@@ -47,6 +47,9 @@ class Product extends HiveObject {
   @HiveField(13)
   String modifiedOn;
 
+  @HiveField(14)
+  Weight weigh;
+
   Product({
     required this.id,
     required this.name,
@@ -62,6 +65,7 @@ class Product extends HiveObject {
     this.lastOrderedOrderId,
     required this.addedOn,
     required this.modifiedOn,
+    required this.weigh,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -73,15 +77,17 @@ class Product extends HiveObject {
       unit: json['unit'],
       category: json['category'],
       mrp: json['MRP']?.toDouble() ?? 0.0,
-      ourPrice: OurPrice.fromJson(json['ourPrice']),
+      ourPrice: OurPrice.fromJson(json['ourPrice'] ?? {}),
       orderFrequency: json['orderFrequency']?.toInt() ?? 0,
       createdBy: json['createdBy'],
       modifiedBy: json['modifiedBy'],
       lastOrderedOrderId: json['lastOrderedOrderId'],
       addedOn: json['addedOn'],
       modifiedOn: json['modifiedOn'],
+      weigh: Weight.fromJson(json['weigh'] ?? {}), // Handle null case
     );
   }
+
 
   factory Product.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> json = doc.data() as Map<String, dynamic>;
@@ -104,6 +110,7 @@ class Product extends HiveObject {
       'lastOrderedOrderId': lastOrderedOrderId,
       'addedOn': addedOn,
       'modifiedOn': modifiedOn,
+      'weigh': weigh.toJson(),
     };
   }
 
@@ -214,3 +221,56 @@ class CustomerPrice {
     };
   }
 }
+
+@HiveType(typeId:4)
+class Weight{
+  @HiveField(0)
+  double weight;
+  @HiveField(1)
+  String unit;
+
+  Weight({required this.weight,required this.unit});
+
+  factory Weight.fromJson(Map<String, dynamic> json) {
+    return Weight(
+      weight: json['weight']?.toDouble() ?? 0.0,
+      unit: json['unit'] ?? ''
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'weight': weight,
+      'unit': unit,
+    };
+  }
+
+}
+// @HiveType(typeId: 4)
+// class Weight {
+//   @HiveField(0)
+//   double weight;
+//
+//   @HiveField(1)
+//   String unit;
+//
+//   Weight({
+//     required this.weight,
+//     required this.unit,
+//   });
+//
+//   factory Weight.fromJson(Map<String, dynamic> json) {
+//     return Weight(
+//       weight: json['weight']?.toDouble() ?? 0.0,
+//       unit: json['unit'] ?? '', // Provide a default unit value or handle null case
+//     );
+//   }
+//
+//
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'weight': weight,
+//       'unit': unit,
+//     };
+//   }
+// }

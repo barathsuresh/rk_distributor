@@ -26,68 +26,78 @@ class ProductManagementScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          actions: [
-            // todo: experimental code remove it
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: OutlinedButton(
-                style: ButtonStyle(foregroundColor: MaterialStateProperty.all<Color>(Colors.red)),
-                  onPressed: () {
-                    uploader.uploadProductsInBackground();
-                  },
-                  child: Text("Do not Press")),
-            )
-          ],
-          title: Row(
-            children: [
-              Icon(CommunityMaterialIcons.tag, size: 25),
-              SizedBox(width: 8),
-              Text(
-                'Products',
-                style: textStyleController.appBarTextStyle.value,
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: SpeedDial(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          icon: Icons.add,
-          activeIcon: Icons.keyboard_arrow_up,
+      appBar: AppBar(
+        actions: [
+          // todo: experimental code remove it
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: OutlinedButton(
+                style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.red)),
+                onPressed: () {
+                  uploader.uploadProductsInBackground();
+                },
+                child: Text("Do not Press")),
+          )
+        ],
+        title: Row(
           children: [
-            SpeedDialChild(
-              child: Icon(Icons.qr_code_scanner),
-              label: 'Scan',
+            Icon(CommunityMaterialIcons.tag, size: 25),
+            SizedBox(width: 8),
+            Text(
+              'Products',
+              style: textStyleController.appBarTextStyle.value,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: SpeedDial(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: Icons.add,
+        activeIcon: Icons.keyboard_arrow_up,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.qr_code_scanner),
+            label: 'Scan',
+            labelStyle: textStyleController.floatingActionButtonStyle.value,
+            onTap: () {
+              productController.clearContents();
+              Get.to(BarcodeScannerScreen());
+            },
+          ),
+          SpeedDialChild(
+              child: Icon(Icons.add),
+              label: 'Add',
               labelStyle: textStyleController.floatingActionButtonStyle.value,
               onTap: () {
                 productController.clearContents();
-                Get.to(BarcodeScannerScreen());
-              },
-            ),
-            SpeedDialChild(
-                child: Icon(Icons.add),
-                label: 'Add',
-                labelStyle: textStyleController.floatingActionButtonStyle.value,
-                onTap: () {
-                  productController.clearContents();
-                  Get.to(AddProductScreen(
-                      barcode: IdGenerator.generateUniqueIdTimeBased()));
-                })
-          ],
-        ),
-        body: Column(
-          children: [
-            CustomListTile(
-              leadingIcon: Icons.straighten,
-              title: "Add a Unit",
-              subtitle: 'Give unit for your Products',
-              onTap: () {
-                _showAddUnitModal(context);
-              },
-            ),
-          ],
-        ));
+                Get.to(AddProductScreen(
+                    barcode: IdGenerator.generateUniqueIdTimeBased()));
+              })
+        ],
+      ),
+      body: Column(
+        children: [
+          CustomListTile(
+            leadingIcon: Icons.straighten,
+            title: "Add a Unit",
+            subtitle: 'Give unit for your Products',
+            onTap: () {
+              _showAddUnitModal(context);
+            },
+          ),
+          CustomListTile(
+            leadingIcon: Icons.straighten,
+            title: "Add a Weight Unit",
+            subtitle: 'Give Weight unit for your Products',
+            onTap: () {
+              _showAddWeightUnitModal(context);
+            },
+          )
+        ],
+      ),
+    );
   }
 
   void _showAddUnitModal(BuildContext context) {
@@ -183,6 +193,110 @@ class ProductManagementScreen extends StatelessWidget {
                         }
                       },
                       child: Text('Add Unit'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAddWeightUnitModal(BuildContext context) {
+    final TextEditingController unitController = TextEditingController();
+
+    showModalBottomSheet(
+      isScrollControlled: true, // This makes the modal bottom sheet scrollable
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 10),
+              if (productService.weightUnits.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      'Manage My Weight Units',
+                      style: textStyleController.appBarTextStyle.value,
+                    ),
+                  ),
+                ),
+              if (productService.weightUnits.isNotEmpty) SizedBox(height: 10),
+              if (productService.weightUnits.isNotEmpty)
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.25,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Obx(() {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: productService.weightUnits.length,
+                              itemBuilder: (context, index) {
+                                final unit = productService.weightUnits[index];
+                                return ListTile(
+                                  title: Text(unit),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.remove_circle,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      productService.deleteWeightUnit(unit);
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add a New Weight Unit',
+                      style: textStyleController.appBarTextStyle.value,
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: unitController,
+                      decoration: InputDecoration(
+                        labelText: 'Weight Unit',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    FilledButton(
+                      onPressed: () {
+                        final newUnit = unitController.text.trim();
+                        if (newUnit.isNotEmpty) {
+                          productService.addWeightUnit(newUnit);
+                          unitController.clear();
+                        } else {
+                          // Show some error or validation
+                        }
+                      },
+                      child: Text('Add Weight Unit'),
                     ),
                   ],
                 ),

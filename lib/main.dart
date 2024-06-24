@@ -38,8 +38,13 @@ void main() async {
   Hive.registerAdapter(OurPriceAdapter());
   Hive.registerAdapter(AreaPriceAdapter());
   Hive.registerAdapter(CustomerPriceAdapter());
+  Hive.registerAdapter(WeightAdapter());
 
   await Hive.openBox<Product>('products');
+  await Hive.openBox('productBox');
+  await Hive.openBox('productServiceBox');
+  await Hive.openBox('categoryBox');
+  await Hive.openBox('unitBox');
   await Firebase.initializeApp();
   _initializeGetStorage();
   _startAppServices();

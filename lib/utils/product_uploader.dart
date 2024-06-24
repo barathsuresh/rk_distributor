@@ -21,19 +21,25 @@ class ProductUploader {
     for (int i = 0; i < count; i++) {
       products.add(
         Product(
-          id: faker.guid.guid(),
-          name: faker.food.dish(),
-          unit: faker.randomGenerator.element(['kg', 'ltr', 'pcs', 'box']),
-          category: faker.food.cuisine(),
-          mrp: faker.randomGenerator.decimal(min: 100, scale: 1000),
-          ourPrice: await generateRandomOurPrice(),
-          orderFrequency: faker.randomGenerator.integer(100),
-          addedOn: DateTime.now().microsecondsSinceEpoch.toString(),
-          modifiedOn: DateTime.now().microsecondsSinceEpoch.toString(),
-        ),
-      );
+            id: faker.guid.guid(),
+            name: faker.food.dish(),
+            unit: faker.randomGenerator.element(['kg', 'ltr', 'pcs', 'box']),
+            category: faker.food.cuisine(),
+            mrp: faker.randomGenerator.decimal(min: 100, scale: 1000),
+            ourPrice: await generateRandomOurPrice(),
+            orderFrequency: faker.randomGenerator.integer(100),
+            addedOn: DateTime.now().microsecondsSinceEpoch.toString(),
+            modifiedOn: DateTime.now().microsecondsSinceEpoch.toString(),
+            weigh: generateWeight(),
+      ));
     }
     return products;
+  }
+
+  Weight generateWeight() {
+    return Weight(
+        weight: faker.randomGenerator.decimal(min: 1, scale: 999),
+        unit: faker.randomGenerator.element(['kg', 'ltr', 'mg', 'ml']));
   }
 
   Future<OurPrice> generateRandomOurPrice() async {
@@ -46,7 +52,10 @@ class ProductUploader {
       print("Customer list is populated with ${customers.length} items");
     }
 
-    final areaList = customers.map((customer) => customer['area'] as String).toSet().toList();
+    final areaList = customers
+        .map((customer) => customer['area'] as String)
+        .toSet()
+        .toList();
 
     if (areaList.isEmpty) {
       print("Area list is empty");
@@ -56,19 +65,20 @@ class ProductUploader {
 
     List<AreaPrice> areaPrices = areaList
         .map((area) => AreaPrice(
-      name: area,
-      price: faker.randomGenerator.decimal(min: 100, scale: 1000),
-    ))
+              name: area,
+              price: faker.randomGenerator.decimal(min: 100, scale: 1000),
+            ))
         .toList();
 
     List<CustomerPrice> customerPrices = customers
         .map((customer) => CustomerPrice(
-      customerId: customer['id'],
-      price: faker.randomGenerator.decimal(min: 100, scale: 1000),
-    ))
+              customerId: customer['id'],
+              price: faker.randomGenerator.decimal(min: 100, scale: 1000),
+            ))
         .toList();
 
-    print("Generated ${areaPrices.length} area prices and ${customerPrices.length} customer prices");
+    print(
+        "Generated ${areaPrices.length} area prices and ${customerPrices.length} customer prices");
 
     return OurPrice(
       common: faker.randomGenerator.decimal(min: 100, scale: 1000),
@@ -81,10 +91,9 @@ class ProductUploader {
     final customerQuerySnapshot = await firestore.collection('customers').get();
     return customerQuerySnapshot.docs
         .map((doc) => {
-      'id': doc.id,
-      ...doc.data(),
-    })
+              'id': doc.id,
+              ...doc.data(),
+            })
         .toList();
   }
-
 }
