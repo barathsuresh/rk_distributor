@@ -8,13 +8,14 @@ class CustomSearchBar extends StatefulWidget {
   final Function(String) onChanged;
   final Function onClear;
   final String? hintText;
-
+  final TextCapitalization? textCapitalization;
   CustomSearchBar({
     required this.searchController,
     required this.searchFocusNode,
     required this.onChanged,
     required this.onClear,
-    this.hintText
+    this.hintText,
+    this.textCapitalization
   });
 
   @override
@@ -49,6 +50,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       borderRadius: BorderRadius.circular(25.0),
       color: isDarkMode ? Colors.grey.shade800 : Colors.white,
       child: TextField(
+        textCapitalization: widget.textCapitalization ?? TextCapitalization.words,
         controller: widget.searchController,
         focusNode: widget.searchFocusNode,
         decoration: InputDecoration(

@@ -16,10 +16,14 @@ class MarketPlacePage extends StatelessWidget {
   final MarketplaceService marketPlaceService = Get.find();
   final ThemeService themeService = Get.find();
   final MarketplaceController marketplaceController = Get.find();
-
+  int? len = 0;
+  void getCollectionLength()async{
+    len = await marketPlaceService.getCollectionLength();
+  }
 
   @override
   Widget build(BuildContext context) {
+    getCollectionLength();
     bool _isScrollingDown = false;
     marketplaceController.scrollController.addListener(() {
       if (marketplaceController.scrollController.position.userScrollDirection ==
@@ -53,7 +57,7 @@ class MarketPlacePage extends StatelessWidget {
             : SizedBox.shrink(),
         body: Column(
           children: [
-            Text(marketPlaceService.displayedProducts.length.toString()),
+            Text("${marketPlaceService.displayedProducts.length.toString()} firebase $len"),
             _buildSearchBar(),
             _buildFilterOptions(context),
             _buildCustomerSelection(context),

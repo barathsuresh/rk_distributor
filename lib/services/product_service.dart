@@ -17,6 +17,7 @@ class ProductService extends GetxService {
     super.onInit();
     // _startProductListener();
     _startCategoryListener();
+    _startProductListener();
     _fetchCategories();
     _fetchUnits();
     _fetchWeightUnits();
@@ -24,13 +25,12 @@ class ProductService extends GetxService {
     _startWeightUnitsListener();
   }
 
-  // void _startProductListener() {
-  //   _firestore.collection('products').snapshots().listen((querySnapshot) {
-  //     final productList = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
-  //     products.assignAll(productList);
-  //     _updateCategories(productList);
-  //   });
-  // }
+  void _startProductListener() {
+    _firestore.collection('products').snapshots().listen((querySnapshot) {
+      final productList = querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
+      _updateCategories(productList);
+    });
+  }
 
   void _startCategoryListener() {
     _firestore.collection('categories').doc('categories').snapshots().listen((documentSnapshot) {

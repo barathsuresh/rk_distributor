@@ -7,7 +7,6 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:rk_distributor/constants/themes.dart';
 import 'package:rk_distributor/controllers/barcode_scan_controller.dart';
-import 'package:rk_distributor/controllers/customer_controller.dart';
 import 'package:rk_distributor/controllers/marketplace_controller.dart';
 import 'package:rk_distributor/controllers/product_controller.dart';
 import 'package:rk_distributor/controllers/user_controller.dart';
@@ -32,6 +31,7 @@ import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
   Hive.registerAdapter(ProductAdapter());
@@ -41,16 +41,16 @@ void main() async {
   Hive.registerAdapter(WeightAdapter());
 
   await Hive.openBox<Product>('products');
-  await Hive.openBox('productBox');
-  await Hive.openBox('productServiceBox');
+  await Hive.openBox<Product>('lastDocument');
   await Hive.openBox('categoryBox');
   await Hive.openBox('unitBox');
+
   await Firebase.initializeApp();
   _initializeGetStorage();
   _startAppServices();
   await GetStorage.init();
   // todo: experimental code remove it
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  Workmanager().initialize(callbackDispatcher);
   runApp(MyApp());
 }
 // todo: experimental code remove it
@@ -60,7 +60,7 @@ void callbackDispatcher() {
     await Firebase.initializeApp();
     if (task == 'uploadProductsTask') {
       // await Get.putAsync(() => CustomerService().init());
-      await addProductsInBatches(500);
+      await addProductsInBatches(100);
       ShowSnackBar.showSnackBarCRUDSuccess(msg: "500 random products added");
       return Future.value(true);
     }
