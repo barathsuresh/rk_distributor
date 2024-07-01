@@ -154,15 +154,6 @@ class AboutUserScreen extends StatelessWidget {
                       : _buildUserProfile(context),
                 ),
                 if (!userController.isEditing.value)
-                  Divider(
-                    color: Color.lerp(
-                        themeService.isDarkMode.value
-                            ? Colors.black
-                            : Colors.white,
-                        Theme.of(context).colorScheme.primary,
-                        0.8),
-                  ),
-                if (!userController.isEditing.value)
                   Align(
                     alignment: Alignment.topLeft,
                     child: Padding(
@@ -181,7 +172,6 @@ class AboutUserScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (!userController.isEditing.value) _buildListItems(context),
                 if (!userController.isEditing.value)
                   Divider(
                     color: Color.lerp(
@@ -191,6 +181,7 @@ class AboutUserScreen extends StatelessWidget {
                         Theme.of(context).colorScheme.primary,
                         0.8),
                   ),
+                if (!userController.isEditing.value) _buildListItems(context),
                 if (!userController.isEditing.value)
                   Align(
                     alignment: Alignment.topLeft,
@@ -209,6 +200,15 @@ class AboutUserScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold),
                       ),
                     ),
+                  ),
+                if (!userController.isEditing.value)
+                  Divider(
+                    color: Color.lerp(
+                        themeService.isDarkMode.value
+                            ? Colors.black
+                            : Colors.white,
+                        Theme.of(context).colorScheme.primary,
+                        0.8),
                   ),
                 if (!userController.isEditing.value)
                   _buildListItemsActions(context),

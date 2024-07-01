@@ -5,9 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:rk_distributor/controllers/marketplace_controller.dart';
+import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/models/product_model.dart';
 import 'package:rk_distributor/services/marketplace_service.dart';
 import 'package:rk_distributor/services/theme_service.dart';
+import 'package:rk_distributor/widgets/custom_product_card.dart';
 import 'package:rk_distributor/widgets/custom_search_bar.dart';
 
 import '../../../api/barcode_img_link_provider.dart';
@@ -16,14 +18,17 @@ class MarketPlacePage extends StatelessWidget {
   final MarketplaceService marketPlaceService = Get.find();
   final ThemeService themeService = Get.find();
   final MarketplaceController marketplaceController = Get.find();
-  int? len = 0;
-  void getCollectionLength()async{
-    len = await marketPlaceService.getCollectionLength();
-  }
+  final TextStyleController textStyleController = Get.find();
+
+  // int? len = 0;
+  //
+  // void getCollectionLength() async {
+  //   len = await marketPlaceService.getCollectionLength();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    getCollectionLength();
+    // getCollectionLength();
     bool _isScrollingDown = false;
     marketplaceController.scrollController.addListener(() {
       if (marketplaceController.scrollController.position.userScrollDirection ==
@@ -46,22 +51,115 @@ class MarketPlacePage extends StatelessWidget {
         marketPlaceService.fetchMoreProducts();
       }
     });
+
+    ever(marketPlaceService.priceSelection, (_) {
+      marketplaceController.updateCartPrices();
+    });
+
+    ever(marketPlaceService.selectedArea, (_) {
+      marketplaceController.updateCartPrices();
+    });
+
+    ever(marketPlaceService.selectedCustomer, (_) {
+      marketplaceController.updateCartPrices();
+    });
     return Obx(
       () => Scaffold(
-        floatingActionButton: marketplaceController.showFAB.value
-            ? FloatingActionButton(
-                onPressed: () {},
-                child:
-                    Badge(label: Text("1"), child: Icon(Icons.shopping_cart)),
-              )
-            : SizedBox.shrink(),
+        // floatingActionButton: marketplaceController.showFAB.value
+        //     ? FloatingActionButton(
+        //         onPressed: () {},
+        //         child:
+        //             Badge(label: Text("1"), child: Icon(Icons.shopping_cart)),
+        //       )
+        //     : SizedBox.shrink(),
         body: Column(
           children: [
-            Text("${marketPlaceService.displayedProducts.length.toString()} firebase $len"),
-            _buildSearchBar(),
-            _buildFilterOptions(context),
-            _buildCustomerSelection(context),
-            _buildPriceSelection(context),
+            _buildSearchBarAndFilter(),
+            Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Row(
+                children: [
+                  Wrap(
+                    children: [
+                      if (marketPlaceService.selectedCategory.value != 'All')
+                        Chip(
+                          label: Text(
+                            marketPlaceService.selectedCategory.value,
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          // backgroundColor: Colors.blue,
+                          deleteIcon: Icon(Icons.clear),
+                          onDeleted: () {
+                            marketPlaceService.onCategoryChanged(null);
+                          },
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Color.lerp(
+                  themeService.isDarkMode.value ? Colors.black : Colors.white,
+                  Theme.of(context).colorScheme.primary,
+                  0.8),
+            ),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Customer",
+                      style: GoogleFonts.roboto(
+                          fontSize: 20,
+                          color: Color.lerp(
+                              themeService.isDarkMode.value
+                                  ? Colors.black
+                                  : Colors.white,
+                              Theme.of(context).colorScheme.primary,
+                              0.8),
+                          fontWeight: FontWeight.bold),
+                    ),
+                    _buildCustomerSelection(context)
+                  ],
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "View Price By",
+                      style: GoogleFonts.roboto(
+                          fontSize: 20,
+                          color: Color.lerp(
+                              themeService.isDarkMode.value
+                                  ? Colors.black
+                                  : Colors.white,
+                              Theme.of(context).colorScheme.primary,
+                              0.8),
+                          fontWeight: FontWeight.bold),
+                    ),
+                    _buildPriceSelection(context)
+                  ],
+                ),
+              ),
+            ),
+            Divider(
+              color: Color.lerp(
+                  themeService.isDarkMode.value ? Colors.black : Colors.white,
+                  Theme.of(context).colorScheme.primary,
+                  0.8),
+            ),
             Expanded(child: _buildProductList()),
             marketPlaceService.isLoading.value
                 ? LoadingAnimationWidget.staggeredDotsWave(
@@ -77,89 +175,112 @@ class MarketPlacePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBarAndFilter() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: CustomSearchBar(
-        searchController: marketPlaceService.searchController,
-        onChanged: marketPlaceService.onSearchChanged,
-        onClear: () {
-          marketPlaceService.searchController.clear();
-          marketPlaceService.onSearchChanged('');
-        },
-        searchFocusNode: FocusNode(),
+      padding: const EdgeInsets.only(left: 8.0, right: 8, top: 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomSearchBar(
+              searchController: marketPlaceService.searchController,
+              onChanged: marketPlaceService.onSearchChanged,
+              onClear: () {
+                marketPlaceService.searchController.clear();
+                marketPlaceService.onSearchChanged('');
+              },
+              searchFocusNode: FocusNode(),
+            ),
+          ),
+          SizedBox(
+            width: 8,
+          ),
+          _buildFilterDropDown()
+        ],
       ),
     );
   }
 
-  Widget _buildFilterOptions(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Filter by Category:'),
-          Obx(() {
-            return DropdownButton<String>(
-              value: marketPlaceService.selectedCategory.value,
-              items: ['All', ...marketPlaceService.productService.categories]
-                  .map((category) => DropdownMenuItem<String>(
-                        value: category,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          child: Text(
-                            category,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (String? value) {
-                if (value != null) {
-                  marketPlaceService.onCategoryChanged(value);
-                }
-              },
-            );
-          }),
-        ],
-      ),
+  Widget _buildFilterDropDown() {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.filter_list),
+      onSelected: (String? newValue) {
+        if (newValue != null) {
+          marketPlaceService.onCategoryChanged(newValue);
+        }
+      },
+      itemBuilder: (BuildContext context) {
+        return marketPlaceService.productService.categories.map((String value) {
+          return PopupMenuItem<String>(
+            value: value,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.3,
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          );
+        }).toList();
+      },
     );
   }
 
   Widget _buildCustomerSelection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Select Customer:'),
-          Obx(() {
-            return DropdownButton<String>(
-              value: marketPlaceService.selectedCustomer.value.isEmpty
-                  ? null
-                  : marketPlaceService.selectedCustomer.value,
-              hint: Text('Select Customer'),
-              items:
-                  marketPlaceService.customerService.customers.map((customer) {
-                return DropdownMenuItem<String>(
-                  value: customer.id,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: Text(customer.name),
-                  ),
-                );
-              }).toList(),
-              onChanged: (String? value) {
-                if (value != null) {
-                  marketPlaceService.onCustomerChanged(value);
-                }
-              },
+    return Obx(() {
+      return DropdownButton<String>(
+        underline: SizedBox.shrink(),
+        value: marketPlaceService.selectedCustomer.value.isEmpty
+            ? null
+            : marketPlaceService.selectedCustomer.value,
+        selectedItemBuilder: (BuildContext context) {
+          return marketPlaceService.customerService.customers.map((customer) {
+            return Container(
+              alignment: Alignment.centerLeft,
+              width: MediaQuery.of(context).size.width *
+                  0.3, // Adjust the width as needed
+              child: Text(
+                customer.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             );
-          }),
-        ],
-      ),
-    );
+          }).toList();
+        },
+        items: marketPlaceService.customerService.customers.map((customer) {
+          return DropdownMenuItem<String>(
+            value: customer.id,
+            child: Container(
+              width: MediaQuery.of(context).size.width *
+                  0.6, // Adjust the width as needed
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer.name,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    customer.area,
+                    style: TextStyle(color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+        onChanged: (String? value) {
+          if (value != null) {
+            marketPlaceService.onCustomerChanged(value);
+          }
+        },
+      );
+    });
   }
 
   Widget _buildPriceSelection(BuildContext context) {
@@ -169,8 +290,8 @@ class MarketPlacePage extends StatelessWidget {
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('View Price By:'),
                 DropdownButton<String>(
+                  underline: SizedBox.shrink(),
                   value: marketPlaceService.priceSelection.value,
                   items: ['Common', 'Area', 'Customer']
                       .map((option) => DropdownMenuItem<String>(
@@ -184,8 +305,12 @@ class MarketPlacePage extends StatelessWidget {
                     }
                   },
                 ),
+                SizedBox(
+                  width: 10,
+                ),
                 if (marketPlaceService.priceSelection.value == 'Area')
                   DropdownButton<String>(
+                    underline: SizedBox.shrink(),
                     value: marketPlaceService.selectedArea.value.isEmpty
                         ? null
                         : marketPlaceService.selectedArea.value,
@@ -193,7 +318,14 @@ class MarketPlacePage extends StatelessWidget {
                     items: marketPlaceService.customerService.areaList
                         .map((area) => DropdownMenuItem<String>(
                               value: area,
-                              child: Text(area),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                child: Text(
+                                  area,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ))
                         .toList(),
                     onChanged: (String? value) {
@@ -206,22 +338,6 @@ class MarketPlacePage extends StatelessWidget {
             );
     });
   }
-
-  Widget _buildProductList() {
-    return Obx(() {
-      return ListView.builder(
-        controller: marketplaceController.scrollController,
-        itemCount: marketPlaceService.displayedProducts.length,
-        itemBuilder: (context, index) {
-          final product = marketPlaceService.displayedProducts[index];
-          final ourPrice = _getOurPrice(marketPlaceService, product);
-
-          return _buildProductCard(product, ourPrice);
-        },
-      );
-    });
-  }
-
   Widget _buildProductCard(Product product, double ourPrice) {
     return Card(
       elevation: 4.0,
@@ -283,7 +399,7 @@ class MarketPlacePage extends StatelessWidget {
                 children: [
                   TextSpan(
                     text:
-                        '${product.weigh.weight.toStringAsFixed(1)} ${product.weigh.unit}',
+                    '${product.weigh.weight.toStringAsFixed(1)} ${product.weigh.unit}',
                     style: GoogleFonts.roboto(
                       fontWeight: FontWeight.w400,
                     ),
@@ -305,7 +421,7 @@ class MarketPlacePage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text:
-                          '${product.mrp.toStringAsFixed(2)} / ${product.unit}',
+                      '${product.mrp.toStringAsFixed(2)} / ${product.unit}',
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w400,
                       ),
@@ -350,6 +466,21 @@ class MarketPlacePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildProductList() {
+    return Obx(() {
+      return ListView.builder(
+        controller: marketplaceController.scrollController,
+        itemCount: marketPlaceService.displayedProducts.length,
+        itemBuilder: (context, index) {
+          final product = marketPlaceService.displayedProducts[index];
+          final ourPrice = _getOurPrice(marketPlaceService, product);
+
+          return ProductCard(product: product, ourPrice: ourPrice);
+        },
+      );
+    });
   }
 
   double _getOurPrice(MarketplaceService service, Product product) {

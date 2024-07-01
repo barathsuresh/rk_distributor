@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/services/customer_service.dart';
 
+import '../../services/marketplace_service.dart';
+
 class AddCustomerScreen extends StatelessWidget {
   final CustomerService customerService = Get.find();
   final TextStyleController textStyleController = Get.find();
+  final MarketplaceService marketplaceService = Get.find();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -68,6 +71,7 @@ class AddCustomerScreen extends StatelessWidget {
                           description: descriptionController.text.trim(),
                           area: enteredArea.trim(),
                         );
+                        marketplaceService.reset();
                         Get.back();
                       }
                     }

@@ -3,6 +3,7 @@ import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:rk_distributor/controllers/marketplace_controller.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/screens/Home_Screens/Analytics_Page/analytics_page.dart';
 import 'package:rk_distributor/screens/Home_Screens/Home_Page/home_page.dart';
@@ -24,7 +25,7 @@ class _HomeScreenSuperSuState extends State<HomeScreenSuperSu> {
   final AuthService authService = Get.find();
 
   final TextStyleController textStyleController = Get.find();
-
+  final MarketplaceController marketplaceController = Get.find();
   final ThemeService themeService = Get.find();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -53,6 +54,20 @@ class _HomeScreenSuperSuState extends State<HomeScreenSuperSu> {
             },
           ),
           actions: [
+            InkWell(
+              // todo: implement cart
+              // onTap: () => Get.to(OrderPage()),
+              child: marketplaceController.orderItems.isEmpty
+                  ? Icon(Icons.shopping_cart_sharp)
+                  : Badge(
+                      label: Text(
+                          marketplaceController.orderItems.length.toString()),
+                      child: Icon(Icons.shopping_cart_sharp),
+                    ),
+            ),
+            SizedBox(
+              width: 5,
+            ),
             if (user != null && user['photoUrl'] != null)
               InkWell(
                 onTap: () {
@@ -91,7 +106,8 @@ class _HomeScreenSuperSuState extends State<HomeScreenSuperSu> {
               ),
               SalomonBottomBarItem(
                 icon: Icon(Icons.store_outlined),
-                selectedColor: themeService.isDarkMode.value ? Colors.white : Colors.black,
+                selectedColor:
+                    themeService.isDarkMode.value ? Colors.white : Colors.black,
                 title: Text(
                   "Market Place",
                   style: textStyleController.bottomNavBarTexStyle.value,
@@ -100,7 +116,8 @@ class _HomeScreenSuperSuState extends State<HomeScreenSuperSu> {
               ),
               SalomonBottomBarItem(
                 icon: Icon(Icons.analytics_outlined),
-                selectedColor: themeService.isDarkMode.value ? Colors.white : Colors.black,
+                selectedColor:
+                    themeService.isDarkMode.value ? Colors.white : Colors.black,
                 title: Text(
                   "Analytics",
                   style: textStyleController.bottomNavBarTexStyle.value,

@@ -8,12 +8,15 @@ import 'package:rk_distributor/controllers/customer_controller.dart';
 import 'package:rk_distributor/controllers/text_style_controller.dart';
 import 'package:rk_distributor/widgets/custom_dialog_box.dart';
 
+import '../../services/marketplace_service.dart';
+
 class AboutCustomerScreen extends StatelessWidget {
   AboutCustomerScreen({required this.customer});
 
   final Customer customer;
   final TextStyleController textStyleController = Get.find();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final MarketplaceService marketplaceService = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +46,7 @@ class AboutCustomerScreen extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () {
+                                marketplaceService.reset();
                                 customerController.deleteCustomer(customer);
                                 Get.back();
                                 Get.back();

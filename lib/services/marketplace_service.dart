@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:rk_distributor/controllers/marketplace_controller.dart';
 import 'package:rk_distributor/services/customer_service.dart';
 import 'package:rk_distributor/services/product_service.dart';
 
+import '../models/order_model.dart';
 import '../models/product_model.dart';
 
 class MarketplaceService extends GetxService {
@@ -33,31 +35,63 @@ class MarketplaceService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    ever(allProducts, (_) async{
+    ever(allProducts, (_) async {
       await filterProducts();
     });
     loadCachedProducts();
     setupRealTimeListeners();
-    ever(priceSelection, (_)async{
+    ever(priceSelection, (_) async {
       await filterProducts();
     });
-    ever(selectedArea, (_)async{
+    ever(selectedArea, (_) async {
       await filterProducts();
     });
-    ever(selectedCustomer, (_)async{
+    ever(selectedCustomer, (_) async {
       await filterProducts();
     });
   }
 
   Future<int?> getCollectionLength() async {
     try {
-      AggregateQuerySnapshot snapshot = await _firestore.collection('products').count().get();
+      AggregateQuerySnapshot snapshot =
+          await _firestore.collection('products').count().get();
       return snapshot.count;
     } catch (e) {
       print('Error getting collection length: $e');
       return 0;
     }
   }
+
+  Future<Product?> getProductById(String productId) async {
+    // Check Hive cache first
+    Product? cachedProduct = productBox.get(productId);
+
+    if (cachedProduct != null) {
+      // Product found in Hive cache
+      return cachedProduct;
+    }
+
+    // Product not found in Hive, fetch from Firestore
+    try {
+      DocumentSnapshot docSnapshot = await _firestore.collection('products').doc(productId).get();
+
+      if (docSnapshot.exists) {
+        Product product = Product.fromFirestore(docSnapshot);
+
+        // Cache the product in Hive
+        productBox.put(productId, product);
+
+        return product;
+      } else {
+        // Product does not exist in Firestore
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching product by ID: $e');
+      return null;
+    }
+  }
+
 
   void loadCachedProducts() async {
     var cachedProducts = productBox.values.toList();
@@ -75,7 +109,7 @@ class MarketplaceService extends GetxService {
           ? lastDocumentBox.get('lastDocument') as Product
           : allProducts.last;
       lastDocument =
-      await _firestore.collection('products').doc(lastProduct.id).get();
+          await _firestore.collection('products').doc(lastProduct.id).get();
     }
 
     fetchInitialProducts();
@@ -88,9 +122,9 @@ class MarketplaceService extends GetxService {
       isLoading.value = true;
       QuerySnapshot querySnapshot = await getProductsPaged(productsPerPage);
       lastDocument =
-      querySnapshot.docs.isEmpty ? null : querySnapshot.docs.last;
+          querySnapshot.docs.isEmpty ? null : querySnapshot.docs.last;
       var fetchedProducts =
-      querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
+          querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
       allProducts.value = fetchedProducts.toSet().toList();
       cacheProducts(fetchedProducts);
       await filterProducts();
@@ -102,7 +136,6 @@ class MarketplaceService extends GetxService {
   }
 
   void fetchMoreProducts() async {
-
     if (searchQuery.value.isNotEmpty || selectedCategory.value != 'All') {
       return; // Do not fetch more products if search or category filter is active
     }
@@ -148,37 +181,47 @@ class MarketplaceService extends GetxService {
     }
   }
 
-  Future<void> filterProducts() async{
+  Future<void> filterProducts() async {
     if (searchQuery.value.isEmpty && selectedCategory.value == 'All') {
       displayedProducts.assignAll(allProducts);
       return;
     }
 
-    try{
+    try {
       isLoading.value = true;
       List<Product> filteredProducts = [];
 
       // Query for search
       if (searchQuery.value.isNotEmpty) {
-        QuerySnapshot searchSnapshot = await _firestore.collection('products')
+        QuerySnapshot searchSnapshot = await _firestore
+            .collection('products')
             .where('name', isGreaterThanOrEqualTo: searchQuery.value)
             .where('name', isLessThanOrEqualTo: searchQuery.value + '\uf8ff')
             .get();
-        filteredProducts = searchSnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
+        filteredProducts = searchSnapshot.docs
+            .map((doc) => Product.fromFirestore(doc))
+            .toList();
       }
 
       // Query for category
       if (selectedCategory.value != 'All') {
-        QuerySnapshot categorySnapshot = await _firestore.collection('products')
+        QuerySnapshot categorySnapshot = await _firestore
+            .collection('products')
             .where('category', isEqualTo: selectedCategory.value)
             .get();
-        List<Product> categoryProducts = categorySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
-        filteredProducts = filteredProducts.isEmpty ? categoryProducts : filteredProducts.where((p) => categoryProducts.any((c) => c.id == p.id)).toList();
+        List<Product> categoryProducts = categorySnapshot.docs
+            .map((doc) => Product.fromFirestore(doc))
+            .toList();
+        filteredProducts = filteredProducts.isEmpty
+            ? categoryProducts
+            : filteredProducts
+                .where((p) => categoryProducts.any((c) => c.id == p.id))
+                .toList();
       }
       displayedProducts.assignAll(filteredProducts);
-    }catch(e){
+    } catch (e) {
       print('Error filtering or searching products: $e');
-    }finally{
+    } finally {
       isLoading.value = false;
     }
     // displayedProducts.value = allProducts.where((product) {
@@ -190,8 +233,20 @@ class MarketplaceService extends GetxService {
     // }).toList();
   }
 
+  Future<void> placeOrder(OrderModel order) async {
+    try {
+      await _firestore.collection('orders').doc(order.id).set(order.toJson());
+    } catch (e) {
+      print('Error placing order: $e');
+      throw e;
+    }
+  }
+
   Future<QuerySnapshot> getProductsPaged(int limit) async {
-    Query query = _firestore.collection('products').orderBy('modifiedOn', descending: true).limit(limit);
+    Query query = _firestore
+        .collection('products')
+        .orderBy('modifiedOn', descending: true)
+        .limit(limit);
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument!);
     }
@@ -205,7 +260,7 @@ class MarketplaceService extends GetxService {
         .limit(allProducts.isEmpty ? productsPerPage : allProducts.length)
         .snapshots()
         .listen((snapshot) async {
-      snapshot.docChanges.forEach((change) async{
+      snapshot.docChanges.forEach((change) async {
         var changedProduct = Product.fromFirestore(change.doc);
         if (change.type == DocumentChangeType.added) {
           if (!allProducts.any((product) => product.id == changedProduct.id)) {
@@ -251,5 +306,13 @@ class MarketplaceService extends GetxService {
 
   void onAreaChanged(String? area) {
     selectedArea.value = area ?? '';
+  }
+
+  void reset() {
+    selectedCategory.value = 'All';
+    selectedArea.value = '';
+    selectedCustomer.value = '';
+    searchQuery.value = '';
+    priceSelection.value = 'Common';
   }
 }
